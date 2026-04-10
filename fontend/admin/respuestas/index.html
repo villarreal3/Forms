@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <link rel="stylesheet" href="../index.css">
+ <link rel="stylesheet" href="../shared/sidebar.css">
+ <title>Respuestas - Forms</title>
+ <style>
+ /* ===== LAYOUT ===== */
+ .page-header { margin-bottom: var(--spacing-lg); }
+ .page-header h1 {
+ font-size: var(--font-size-2xl);
+ font-weight: var(--font-weight-bold);
+ color: var(--color-text-primary);
+ }
+
+ /* ===== TOP BAR: select + search in one row ===== */
+ .top-bar {
+ display: flex;
+ gap: var(--spacing-md);
+ margin-bottom: var(--spacing-lg);
+ flex-wrap: wrap;
+ align-items: stretch;
+ }
+ .top-bar__select {
+ flex: 0 0 30rem;
+ min-width: 0;
+ }
+ .top-bar__search {
+ flex: 1;
+ min-width: 22rem;
+ position: relative;
+ }
+ .top-bar select,
+ .top-bar input {
+ width: 100%;
+ height: 100%;
+ padding: var(--spacing-sm) var(--spacing-md);
+ border: 1px solid var(--color-border);
+ border-radius: var(--border-radius-md);
+ font-size: var(--font-size-base);
+ color: var(--color-text-primary);
+ background: var(--color-bg-primary);
+ transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+ }
+ .top-bar select:focus,
+ .top-bar input:focus {
+ outline: none;
+ border-color: var(--color-primary);
+ box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent);
+ }
+ .top-bar__search input { padding-right: 4rem; }
+ .search-clear {
+ position: absolute;
+ right: var(--spacing-sm);
+ top: 50%;
+ transform: translateY(-50%);
+ background: transparent;
+ border: none;
+ font-size: var(--font-size-xl);
+ color: var(--color-text-muted);
+ cursor: pointer;
+ padding: var(--spacing-xs);
+ display: none;
+ line-height: 1;
+ }
+ .search-clear.visible { display: block; }
+ .search-clear:hover { color: var(--color-text-primary); }
+
+ /* ===== EMPTY PROMPT ===== */
+ .empty-prompt {
+ text-align: center;
+ padding: var(--spacing-3xl) var(--spacing-lg);
+ }
+ .empty-prompt .prompt-icon {
+ width: 6.4rem;
+ height: 6.4rem;
+ margin: 0 auto var(--spacing-md);
+ background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+ border-radius: var(--border-radius-full);
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ font-size: 2.8rem;
+ }
+ .empty-prompt h3 {
+ font-size: var(--font-size-lg);
+ font-weight: var(--font-weight-semibold);
+ color: var(--color-text-primary);
+ margin-bottom: var(--spacing-xs);
+ }
+ .empty-prompt p {
+ color: var(--color-text-secondary);
+ font-size: var(--font-size-sm);
+ max-width: 36rem;
+ margin: 0 auto;
+ }
+
+ /* ===== CONTENT AREA ===== */
+ .content-area { display: none; }
+ .content-area.visible { display: block; }
+
+ /* ===== INFO STRIP ===== */
+ .info-strip {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ gap: var(--spacing-md);
+ flex-wrap: wrap;
+ padding: var(--spacing-md) var(--spacing-lg);
+ margin-bottom: var(--spacing-md);
+ background: var(--color-bg-primary);
+ border: 1px solid var(--color-border);
+ border-radius: var(--border-radius-lg);
+ box-shadow: var(--shadow-sm);
+ position: relative;
+ }
+ .info-strip__left {
+ display: flex;
+ align-items: center;
+ gap: var(--spacing-md);
+ flex-wrap: wrap;
+ min-width: 0;
+ }
+ .info-strip__name {
+ font-size: var(--font-size-lg);
+ font-weight: var(--font-weight-semibold);
+ color: var(--color-text-primary);
+ white-space: nowrap;
+ overflow: hidden;
+ text-overflow: ellipsis;
+ max-width: 32rem;
+ }
+ .info-strip__stats {
+ display: flex;
+ gap: var(--spacing-sm);
+ align-items: center;
+ font-size: var(--font-size-sm);
+ color: var(--color-text-secondary);
+ }
+ .info-strip__stat {
+ display: inline-flex;
+ align-items: center;
+ gap: 0.4rem;
+ padding: var(--spacing-xs) var(--spacing-sm);
+ background: var(--color-bg-secondary);
+ border-radius: var(--border-radius-md);
+ font-variant-numeric: tabular-nums;
+ }
+ .info-strip__stat strong {
+ color: var(--color-text-primary);
+ font-weight: var(--font-weight-semibold);
+ }
+ .info-strip__stat--attended strong { color: var(--color-success); }
+
+ /* ===== ACTIONS ROW ===== */
+ .actions-row {
+ display: flex;
+ gap: var(--spacing-sm);
+ margin-bottom: var(--spacing-lg);
+ flex-wrap: wrap;
+ align-items: center;
+ }
+ .actions-row__spacer { flex: 1; }
+
+ /* ===== BUTTONS ===== */
+ .btn {
+ padding: var(--spacing-sm) var(--spacing-md);
+ border-radius: var(--border-radius-md);
+ font-size: var(--font-size-sm);
+ font-weight: var(--font-weight-medium);
+ cursor: pointer;
+ transition: all var(--transition-fast);
+ border: 1px solid transparent;
+ display: inline-flex;
+ align-items: center;
+ gap: var(--spacing-xs);
+ white-space: nowrap;
+ text-decoration: none;
+ }
+ .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+ .btn-primary {
+ background: var(--color-primary);
+ color: var(--color-text-inverse);
+ }
+ .btn-primary:hover:not(:disabled) {
+ background: var(--color-primary-dark);
+ }
+ .btn-ghost {
+ background: transparent;
+ color: var(--color-text-secondary);
+ border-color: var(--color-border);
+ }
+ .btn-ghost:hover:not(:disabled) {
+ background: var(--color-bg-secondary);
+ color: var(--color-text-primary);
+ }
+ .btn-ghost.active {
+ background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+ color: var(--color-primary);
+ border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
+ }
+ .btn-success {
+ background: var(--color-success);
+ color: var(--color-text-inverse);
+ }
+ .btn-success:hover:not(:disabled) {
+ background: color-mix(in srgb, var(--color-success) 85%, black);
+ }
+
+ /* ===== ADVANCED FILTERS (collapsible) ===== */
+ .adv-filters {
+ display: none;
+ gap: var(--spacing-md);
+ padding: var(--spacing-md) var(--spacing-lg);
+ margin-bottom: var(--spacing-lg);
+ background: var(--color-bg-primary);
+ border: 1px solid var(--color-border);
+ border-radius: var(--border-radius-lg);
+ flex-wrap: wrap;
+ align-items: flex-end;
+ }
+ .adv-filters.open { display: flex; }
+ .adv-filters__field {
+ display: flex;
+ flex-direction: column;
+ gap: var(--spacing-xs);
+ flex: 1;
+ min-width: 16rem;
+ }
+ .adv-filters__field label {
+ font-size: var(--font-size-xs);
+ font-weight: var(--font-weight-medium);
+ color: var(--color-text-secondary);
+ text-transform: uppercase;
+ letter-spacing: 0.03em;
+ }
+ .adv-filters__field input {
+ padding: var(--spacing-sm) var(--spacing-md);
+ border: 1px solid var(--color-border);
+ border-radius: var(--border-radius-md);
+ font-size: var(--font-size-sm);
+ color: var(--color-text-primary);
+ background: var(--color-bg-primary);
+ }
+ .adv-filters__field input:focus {
+ outline: none;
+ border-color: var(--color-primary);
+ box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent);
+ }
+ .adv-filters__actions {
+ display: flex;
+ gap: var(--spacing-sm);
+ align-self: flex-end;
+ }
+
+ /* ===== DATA TABLE ===== */
+ .table-section {
+ background: var(--color-bg-primary);
+ border: 1px solid var(--color-border);
+ border-radius: var(--border-radius-lg);
+ box-shadow: var(--shadow-sm);
+ overflow: hidden;
+ position: relative;
+ }
+ .table-wrap { overflow-x: auto; }
+ .data-table {
+ width: 100%;
+ border-collapse: collapse;
+ font-size: var(--font-size-sm);
+ }
+ .data-table thead { background: var(--color-bg-secondary); }
+ .data-table th {
+ padding: var(--spacing-sm) var(--spacing-md);
+ text-align: left;
+ font-weight: var(--font-weight-semibold);
+ color: var(--color-text-secondary);
+ text-transform: uppercase;
+ letter-spacing: 0.04em;
+ border-bottom: 2px solid var(--color-border);
+ font-size: var(--font-size-xs);
+ }
+ .data-table tbody tr {
+ border-bottom: 1px solid var(--color-border);
+ transition: background var(--transition-fast);
+ }
+ .data-table tbody tr:hover { background: var(--color-bg-secondary); }
+ .data-table td {
+ padding: var(--spacing-sm) var(--spacing-md);
+ color: var(--color-text-primary);
+ }
+ .table-footer {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ padding: var(--spacing-sm) var(--spacing-md);
+ border-top: 1px solid var(--color-border);
+ font-size: var(--font-size-xs);
+ color: var(--color-text-secondary);
+ }
+
+ /* ===== ATTENDANCE CHECKBOX ===== */
+ .att-check {
+ display: flex;
+ align-items: center;
+ gap: var(--spacing-xs);
+ }
+ .att-check input[type="checkbox"] {
+ width: 1.6rem;
+ height: 1.6rem;
+ cursor: pointer;
+ accent-color: var(--color-success);
+ }
+
+ /* ===== STATES ===== */
+ .state-msg {
+ text-align: center;
+ padding: var(--spacing-xl) var(--spacing-md);
+ color: var(--color-text-secondary);
+ }
+ .state-msg--error { color: var(--color-error); }
+
+ /* ===== SPINNER ===== */
+ .spinner {
+ width: 2.8rem;
+ height: 2.8rem;
+ margin: 0 auto var(--spacing-sm);
+ border: 3px solid var(--color-gray-200);
+ border-top-color: var(--color-primary);
+ border-radius: 50%;
+ animation: spin 0.7s linear infinite;
+ }
+ @keyframes spin { to { transform: rotate(360deg); } }
+
+ /* ===== RESPONSIVE ===== */
+ @media (max-width: 768px) {
+ .top-bar { flex-direction: column; }
+ .top-bar__select { flex: 1; }
+ .info-strip { flex-direction: column; align-items: flex-start; }
+ .info-strip__name { max-width: 100%; }
+ .actions-row { flex-direction: column; }
+ .actions-row .btn { width: 100%; justify-content: center; }
+ .actions-row__spacer { display: none; }
+ .adv-filters__field { min-width: 100%; }
+ }
+ </style>
+</head>
+<body>
+ <div class="app-container">
+ <button class="nav-toggle" aria-label="Abrir menú" aria-expanded="false">
+ <span></span><span></span><span></span>
+ </button>
+
+ <header id="navbar"></header>
+
+ <main class="main-content">
+ <div class="page-header">
+ <h1>Respuestas</h1>
+ </div>
+
+ <!-- Top bar: form selector + universal search -->
+ <div class="top-bar">
+ <div class="top-bar__select">
+ <select id="formSelect" aria-label="Formulario">
+ <option value="">Elige un formulario</option>
+ </select>
+ </div>
+ <div class="top-bar__search">
+ <input type="text" id="searchInput" placeholder="Buscar formulario..." aria-label="Buscar formulario">
+ <button class="search-clear" id="btnClearSearch" type="button" aria-label="Limpiar">&times;</button>
+ </div>
+ </div>
+
+ <!-- Empty state -->
+ <div id="emptyPrompt" class="empty-prompt">
+ <div class="prompt-icon" aria-hidden="true">&#128203;</div>
+ <h3>Elige un formulario</h3>
+ <p>Selecciona un formulario de la lista para ver las personas que respondieron.</p>
+ </div>
+
+ <!-- Content area -->
+ <div id="contentArea" class="content-area">
+ <!-- Info strip: form name + counts + status -->
+ <div class="info-strip">
+ <div class="info-strip__left">
+ <span class="info-strip__name" id="formName">—</span>
+ <span id="statusBadge" class="status-badge"></span>
+ <div class="info-strip__stats">
+ <span class="info-strip__stat"><strong id="totalCount">0</strong>&nbsp;respuestas</span>
+ <span class="info-strip__stat info-strip__stat--attended"><strong id="attendedCount">0</strong>&nbsp;asistieron</span>
+ </div>
+ </div>
+ </div>
+
+ <!-- Action buttons -->
+ <div class="actions-row">
+ <button class="btn btn-ghost" id="btnToggleFilters" type="button">Filtros avanzados</button>
+ <div class="actions-row__spacer"></div>
+ <button class="btn btn-success" id="btnExport" type="button">
+ <span>Descargar Excel</span>
+ </button>
+ </div>
+
+ <!-- Collapsible advanced filters -->
+ <div class="adv-filters" id="advFilters">
+ <div class="adv-filters__field">
+ <label for="filterStartDate">Desde</label>
+ <input type="date" id="filterStartDate">
+ </div>
+ <div class="adv-filters__field">
+ <label for="filterEndDate">Hasta</label>
+ <input type="date" id="filterEndDate">
+ </div>
+ <div class="adv-filters__field">
+ <label for="filterProvince">Provincia</label>
+ <input type="text" id="filterProvince" placeholder="Ej: Panamá">
+ </div>
+ <div class="adv-filters__actions">
+ <button class="btn btn-ghost" id="btnClearFilters" type="button">Limpiar</button>
+ <button class="btn btn-primary" id="btnApplyFilters" type="button">Aplicar</button>
+ </div>
+ </div>
+
+ <!-- Data table -->
+ <div class="table-section">
+ <div class="table-wrap">
+ <table class="data-table">
+ <thead>
+ <tr>
+ <th>Nombre</th>
+ <th>Correo</th>
+ <th>Cédula</th>
+ <th>Teléfono</th>
+ <th>Fecha</th>
+ <th>Asistió</th>
+ </tr>
+ </thead>
+ <tbody id="tableBody">
+ <tr><td colspan="6"><div class="state-msg"><p>Elige un formulario para comenzar.</p></div></td></tr>
+ </tbody>
+ </table>
+ </div>
+ <div class="table-footer">
+ <span id="tableCount">0 resultados</span>
+ <span id="tableAttendance"></span>
+ </div>
+ </div>
+ </div>
+
+ <footer class="main-footer">
+ &copy; 2025 Proyecto Forms. Todos los derechos reservados.
+ </footer>
+ </main>
+ </div>
+
+ <script type="module" src="../../utils/bootstrap.js"></script>
+ <script src="../shared/nav-toggle.js"></script>
+ <script>window.page = 'respuestas';</script>
+ <script type="module">
+ import { apiRequest, apiRequestBlob, API_CONFIG } from '../../services/index.js';
+ import { formatDate } from '../../utils/format.js';
+ import { downloadFile } from '../../utils/file.js';
+ import { showNotification } from '../../components/index.js';
+
+ /* === STATE === */
+ let forms = [];
+ let currentForm = null;
+ let allSubmissions = [];
+ let displayList = [];
+
+ /* === DOM === */
+ const $ = id => document.getElementById(id);
+ const $formSelect = $('formSelect');
+ const $searchInput = $('searchInput');
+ const $btnClearSearch = $('btnClearSearch');
+ const $emptyPrompt = $('emptyPrompt');
+ const $content = $('contentArea');
+ const $formName = $('formName');
+ const $statusBadge = $('statusBadge');
+ const $totalCount = $('totalCount');
+ const $attendedCount = $('attendedCount');
+ const $tableBody = $('tableBody');
+ const $tableCount = $('tableCount');
+ const $tableAtt = $('tableAttendance');
+ const $btnExport = $('btnExport');
+ const $btnToggle = $('btnToggleFilters');
+ const $advFilters = $('advFilters');
+ const $filterStart = $('filterStartDate');
+ const $filterEnd = $('filterEndDate');
+ const $filterProvince = $('filterProvince');
+ const $btnApply = $('btnApplyFilters');
+ const $btnClear = $('btnClearFilters');
+ const COL_SPAN = 6;
+
+ /* === HELPERS === */
+ function parseBackendDate(v) {
+ if (!v) return null;
+ if (v instanceof Date) return v;
+ if (typeof v !== 'string') return new Date(v);
+ let s = v.trim();
+ if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(s)) s = s.replace(' ', 'T');
+ return new Date(s.replace(/Z$/, '').replace(/([+-]\d{2}:\d{2})$/, ''));
+ }
+
+ function isAttended(val) {
+ if (val === true || val === 1) return true;
+ if (typeof val === 'string') {
+ const v = val.trim().toLowerCase();
+ return v === '1' || v === 'true' || v === 'sí' || v === 'si';
+ }
+ return false;
+ }
+
+ function getComputedStatus(form) {
+ if (!form) return { key: 'draft', text: 'Borrador' };
+ const now = new Date();
+ const openAt = form.open_at ? parseBackendDate(form.open_at) : null;
+ const expiresAt = form.expires_at ? parseBackendDate(form.expires_at) : null;
+ if (form.status === 0) return { key: 'closed', text: 'Cerrado' };
+ if (form.status === 2) return { key: 'draft', text: 'Borrador' };
+ if (openAt && openAt > now) return { key: 'future_open', text: 'Apertura futura' };
+ if (expiresAt && expiresAt <= now) return { key: 'expired', text: 'Expirado' };
+ return { key: 'active', text: 'Abierto' };
+ }
+
+ function stateHTML(text, error) {
+ return `<tr><td colspan="${COL_SPAN}"><div class="state-msg ${error ? 'state-msg--error' : ''}"><p>${text}</p></div></td></tr>`;
+ }
+ function loadingHTML() {
+ return `<tr><td colspan="${COL_SPAN}"><div class="state-msg"><div class="spinner"></div><p>Cargando...</p></div></td></tr>`;
+ }
+
+ /* === LOAD FORMS === */
+ async function loadForms() {
+ try {
+ const res = await apiRequest(API_CONFIG.ENDPOINTS.FORMS);
+ if (res.success && res.forms) {
+ forms = res.forms;
+ rebuildFormSelect(forms);
+ const urlId = new URLSearchParams(window.location.search).get('id');
+ if (urlId) {
+ $formSelect.value = urlId;
+ selectForm(parseInt(urlId));
+ }
+ }
+ } catch (err) {
+ console.error('Error cargando formularios:', err);
+ showNotification('No se pudieron cargar los formularios.', 'error');
+ }
+ }
+
+ function rebuildFormSelect(list) {
+ const prevValue = $formSelect.value;
+ $formSelect.innerHTML = '<option value="">Elige un formulario</option>';
+ list.forEach(f => {
+ const opt = document.createElement('option');
+ opt.value = f.id;
+ opt.textContent = f.form_name;
+ $formSelect.appendChild(opt);
+ });
+ if (prevValue && list.some(f => String(f.id) === prevValue)) {
+ $formSelect.value = prevValue;
+ }
+ }
+
+ function filterForms() {
+ const term = ($searchInput.value || '').toLowerCase().trim();
+ $btnClearSearch.classList.toggle('visible', term.length > 0);
+ if (!term) {
+ rebuildFormSelect(forms);
+ return;
+ }
+ const filtered = forms.filter(f =>
+ f.form_name.toLowerCase().includes(term)
+ );
+ rebuildFormSelect(filtered);
+ }
+
+ /* === SELECT FORM === */
+ async function selectForm(formId) {
+ if (!formId) {
+ $emptyPrompt.style.display = '';
+ $content.classList.remove('visible');
+ currentForm = null;
+ allSubmissions = [];
+ return;
+ }
+
+ $emptyPrompt.style.display = 'none';
+ $content.classList.add('visible');
+ $tableBody.innerHTML = loadingHTML();
+
+ try {
+ const r = await apiRequest(API_CONFIG.ENDPOINTS.FORM(formId));
+ if (r?.success && r.form) {
+ currentForm = r.form;
+ $formName.textContent = currentForm.form_name;
+ syncStatus();
+ }
+ } catch (err) {
+ console.error('Error cargando formulario:', err);
+ }
+
+ await fetchSubmissions(formId);
+ }
+
+ /* === STATUS (read-only badge) === */
+ function syncStatus() {
+ if (!currentForm) return;
+ const s = getComputedStatus(currentForm);
+ $statusBadge.className = 'status-badge ' + s.key;
+ $statusBadge.textContent = s.text;
+ }
+
+ /* === FETCH SUBMISSIONS (server-side filters) === */
+ async function fetchSubmissions(formId) {
+ if (!formId) return;
+ $tableBody.innerHTML = loadingHTML();
+
+ const p = new URLSearchParams();
+ p.append('form_id', formId);
+ if ($filterStart.value) p.append('start_date', $filterStart.value);
+ if ($filterEnd.value) p.append('end_date', $filterEnd.value);
+ if ($filterProvince.value.trim()) p.append('province', $filterProvince.value.trim());
+ p.append('limit', '1000');
+
+ try {
+ const res = await apiRequest(`${API_CONFIG.ENDPOINTS.SUBMISSIONS}?${p}`);
+ if (res?.success && res.submissions) {
+ allSubmissions = res.submissions;
+ displayList = [...allSubmissions];
+ render(displayList);
+ } else {
+ allSubmissions = [];
+ displayList = [];
+ render([]);
+ }
+ } catch (err) {
+ console.error('Error cargando respuestas:', err);
+ showNotification('Error cargando respuestas.', 'error');
+ $tableBody.innerHTML = stateHTML('Ocurrió un error al cargar los datos.', true);
+ }
+ }
+
+ /* === RENDER TABLE === */
+ function render(list) {
+ if (!list || !list.length) {
+ $tableBody.innerHTML = stateHTML('No se encontraron resultados.');
+ updateFooter(0, 0);
+ updateCounts(0, 0);
+ return;
+ }
+
+ const total = list.length;
+ const att = list.filter(s => isAttended(s.attended)).length;
+ updateCounts(att, total);
+ updateFooter(total, att);
+
+ $tableBody.innerHTML = list.map(s => {
+ const a = isAttended(s.attended);
+ return `<tr>
+ <td>${s.first_name || ''} ${s.last_name || ''}</td>
+ <td>${s.email || '-'}</td>
+ <td>${s.id_number || '-'}</td>
+ <td>${s.phone || '-'}</td>
+ <td>${formatDate(s.submitted_at)}</td>
+ <td><label class="att-check"><input type="checkbox" ${a ? 'checked' : ''} data-uid="${s.user_id}" data-fid="${currentForm?.id || ''}"><span>${a ? 'Sí' : 'No'}</span></label></td>
+ </tr>`;
+ }).join('');
+ }
+
+ function updateCounts(attended, total) {
+ $totalCount.textContent = total;
+ $attendedCount.textContent = attended;
+ }
+
+ function updateFooter(total, attended) {
+ $tableCount.textContent = `${total} resultado${total !== 1 ? 's' : ''}`;
+ $tableAtt.textContent = attended > 0 ? `${attended} asistieron` : '';
+ }
+
+ /* === ATTENDANCE (delegated) === */
+ $tableBody.addEventListener('change', async (e) => {
+ const cb = e.target;
+ if (cb.type !== 'checkbox' || !cb.dataset.uid) return;
+ const userId = parseInt(cb.dataset.uid);
+ const formId = parseInt(cb.dataset.fid);
+
+ try {
+ const res = await apiRequest(API_CONFIG.ENDPOINTS.ATTENDANCE_UPDATE, {
+ method: 'POST',
+ body: JSON.stringify({ user_id: userId, form_id: formId, attended: cb.checked })
+ });
+ if (res.success) {
+ showNotification(`Asistencia ${cb.checked ? 'marcada' : 'desmarcada'}.`, 'success');
+ await fetchSubmissions(formId);
+ }
+ } catch (err) {
+ showNotification('Error actualizando asistencia.', 'error');
+ await fetchSubmissions(formId);
+ }
+ });
+
+ /* === EXPORT === */
+ async function exportExcel() {
+ if (!currentForm) { showNotification('Selecciona un formulario.', 'warning'); return; }
+
+ const filters = { form_id: currentForm.id };
+ if ($filterStart.value) filters.start_date = $filterStart.value;
+ if ($filterEnd.value) filters.end_date = $filterEnd.value;
+ if ($filterProvince.value.trim()) filters.province = $filterProvince.value.trim();
+
+ $btnExport.disabled = true;
+ $btnExport.querySelector('span').textContent = 'Descargando...';
+
+ try {
+ const blob = await apiRequestBlob(API_CONFIG.ENDPOINTS.EXPORT, {
+ method: 'POST',
+ body: JSON.stringify(filters)
+ });
+ downloadFile(blob, `respuestas_${currentForm.id}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+ showNotification('Archivo descargado.', 'success');
+ } catch (err) {
+ showNotification('Error al exportar: ' + err.message, 'error');
+ } finally {
+ $btnExport.disabled = false;
+ $btnExport.querySelector('span').textContent = 'Descargar Excel';
+ }
+ }
+
+ /* === ADVANCED FILTERS === */
+ function toggleFilters() {
+ const open = $advFilters.classList.toggle('open');
+ $btnToggle.classList.toggle('active', open);
+ }
+
+ function applyAdvFilters() {
+ if (currentForm) fetchSubmissions(currentForm.id);
+ }
+
+ function clearAdvFilters() {
+ $filterStart.value = '';
+ $filterEnd.value = '';
+ $filterProvince.value = '';
+ if (currentForm) fetchSubmissions(currentForm.id);
+ }
+
+ /* === EVENT BINDINGS === */
+ $formSelect.addEventListener('change', () => {
+ const id = parseInt($formSelect.value) || null;
+ if (id) {
+ const url = new URL(window.location);
+ url.searchParams.set('id', id);
+ window.history.replaceState({}, '', url);
+ }
+ selectForm(id);
+ });
+
+ $searchInput.addEventListener('input', filterForms);
+ $btnClearSearch.addEventListener('click', () => { $searchInput.value = ''; filterForms(); $searchInput.focus(); });
+ $btnExport.addEventListener('click', exportExcel);
+ $btnToggle.addEventListener('click', toggleFilters);
+ $btnApply.addEventListener('click', applyAdvFilters);
+ $btnClear.addEventListener('click', clearAdvFilters);
+
+ /* === INIT === */
+ if (document.readyState === 'loading') {
+ document.addEventListener('DOMContentLoaded', loadForms);
+ } else {
+ loadForms();
+ }
+ </script>
+</body>
+</html>

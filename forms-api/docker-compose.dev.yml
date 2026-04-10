@@ -1,0 +1,9 @@
+services:
+  forms:
+    networks:
+      - users-shared
+
+networks:
+  users-shared:
+    name: forms-users-shared
+    external: true

@@ -1,0 +1,83 @@
+services:
+  # Base de datos MySQL
+  mysql:
+    image: docker.io/library/mysql:8
+    container_name: mysql
+    command: ["--default-time-zone=-05:00"]
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-secret}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-app_db}
+      MYSQL_USER: ${MYSQL_USER:-app_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-app_password}
+      TZ: ${TIMEZONE:-America/Panama}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - forms-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-secret}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Swagger / OpenAPI estático (forms/docs) — sube con compose, sin esperar MySQL ni la API
+  api-docs:
+    image: docker.io/library/nginx:alpine
+    container_name: forms-api-docs
+    environment:
+      TZ: ${TIMEZONE:-America/Panama}
+    ports:
+      - "${API_DOCS_PORT:-8081}:80"
+    volumes:
+      - ./forms/docs:/usr/share/nginx/html:ro
+    networks:
+      - forms-network
+    restart: unless-stopped
+
+  # Microservicio de Formularios
+  forms:
+    build:
+      context: ./forms
+      dockerfile: Dockerfile
+    container_name: forms-app
+    depends_on:
+      mysql:
+        condition: service_healthy
+    env_file:
+      - ./.env
+    environment:
+      DB_HOST: ${DB_HOST:-mysql}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_USER: ${DB_USER:-root}
+      DB_PASSWORD: ${DB_PASSWORD:-secret}
+      DB_NAME: ${DB_NAME:-app_db}
+      SERVER_PORT: ${SERVER_PORT:-8080}
+      EMAILS_DIR: ${EMAILS_DIR:-src/emails}
+      IMAGES_DIR: ${IMAGES_DIR:-src/img}
+      USERS_API_URL: ${USERS_API_URL:-http://users-api:3000}
+      JWT_SECRET: ${JWT_SECRET:-your_jwt_secret_key_change_this_in_production}
+      TZ: ${TIMEZONE:-America/Panama}
+    ports:
+      - "8080:8080"
+    networks:
+      - forms-network
+    restart: unless-stopped
+    volumes:
+      - ./src:/app/src
+
+networks:
+  forms-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
+  # Bind mount: almacenamiento local (emails, imágenes) en ./src → /app/src
+  # forms_storage:
+  #   driver: local
+
+
+
+

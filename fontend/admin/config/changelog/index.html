@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <link rel="stylesheet" href="../../index.css">
+ <link rel="stylesheet" href="../../shared/sidebar.css">
+ <link rel="stylesheet" href="index.css">
+ <title>Actualizaciones - Forms</title>
+</head>
+<body>
+ <div class="app-container">
+ <button class="nav-toggle" aria-label="Abrir menú" aria-expanded="false">
+ <span></span>
+ <span></span>
+ <span></span>
+ </button>
+
+ <header id="navbar"></header>
+
+ <main class="main-content">
+ <div class="changelog-header">
+ <div class="changelog-header-content">
+ <h1>Actualizaciones</h1>
+ <p>Notas de cambios del sistema</p>
+ </div>
+ <a href="../" class="changelog-back-link">
+ ← Volver a Configuración
+ </a>
+ </div>
+
+ <section class="changelog-surface">
+ <div class="changelog-toolbar">
+ <div class="changelog-toolbar-left">
+ <label class="changelog-label" for="changelogFilter">Filtrar</label>
+ <select id="changelogFilter" class="changelog-select" aria-label="Filtrar notas de cambios">
+ <option value="all">Todo</option>
+ <option value="added">Agregado</option>
+ <option value="changed">Modificado</option>
+ <option value="fixed">Corregido</option>
+ <option value="removed">Eliminado</option>
+ <option value="deprecated">Obsoleto</option>
+ <option value="security">Seguridad</option>
+ </select>
+ </div>
+ <div class="changelog-toolbar-right">
+ <span id="changelogMeta" class="changelog-meta" aria-live="polite"></span>
+ </div>
+ </div>
+
+ <div id="changelogContainer" class="changelog-container" aria-busy="true">
+ <div class="changelog-loading">
+ <p>Cargando actualizaciones...</p>
+ </div>
+ </div>
+ </section>
+
+ <footer class="main-footer">
+ © 2025 Proyecto Forms. Todos los derechos reservados.
+ </footer>
+ </main>
+ </div>
+
+<!-- Bootstrap (carga todos los módulos) -->
+<script type="module" src="../../../utils/bootstrap.js"></script>
+<!-- Nav Toggle Script -->
+<script src="../../shared/nav-toggle.js"></script>
+<!-- Page scripts -->
+<script type="module" src="changelog.js"></script>
+<script>
+ // Establecer página actual para el layout
+ window.page = 'changelog';
+
+ // UI del changelog vive en `changelog.js`
+</script>
+</body>
+</html>

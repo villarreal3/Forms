@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <link rel="stylesheet" href="../index.css">
+ <link rel="stylesheet" href="../shared/sidebar.css">
+ <link rel="stylesheet" href="index.css">
+ <title>Configuración - Forms</title>
+ </head>
+<body>
+ <div class="app-container">
+ <button class="nav-toggle" aria-label="Abrir menú" aria-expanded="false">
+ <span></span>
+ <span></span>
+ <span></span>
+ </button>
+ 
+ <header id="navbar"></header>
+ 
+ <main class="main-content">
+ <!-- Header -->
+ <div>
+ <h1>Configuración</h1>
+ <p>Gestiona la configuración del sistema</p>
+ </div>
+
+ <!-- Config Cards Grid -->
+ <div class="config-cards-grid">
+ <!-- Actualizaciones Card -->
+ <a href="changelog/" class="config-card">
+ <div>
+ <div class="config-card-icon">
+ <div class="icon-clipboard-document-list"></div>
+ </div>
+ <h3>Actualizaciones</h3>
+ <p>Historial de cambios y versiones del sistema</p>
+ </div>
+ </a>
+
+ 
+ </div>
+ 
+ <footer class="main-footer">
+ © 2025 Proyecto Forms. Todos los derechos reservados.
+ </footer>
+ </main>
+ </div>
+
+<!-- Bootstrap (carga todos los módulos) -->
+<script type="module" src="../../utils/bootstrap.js"></script>
+<!-- Nav Toggle Script -->
+<script src="../shared/nav-toggle.js"></script>
+<script>
+ // Establecer página actual para el layout
+ window.page = 'config';
+ 
+ // Insertar heroicons cuando el DOM esté listo
+ document.addEventListener('DOMContentLoaded', () => {
+ // Icono de actualizaciones
+ const clipboardIcon = document.querySelector('.icon-clipboard-document-list');
+ if (clipboardIcon && window.getHeroiconSVG) {
+ clipboardIcon.innerHTML = window.getHeroiconSVG('clipboard-document-list');
+ }
+ 
+ // Icono de usuarios
+ const usersIcon = document.querySelector('.icon-users');
+ if (usersIcon && window.getHeroiconSVG) {
+ usersIcon.innerHTML = window.getHeroiconSVG('users');
+ }
+ });
+
+ // Mostrar tarjeta Usuarios si el usuario es admin (legacy user.role o Users API user.roles)
+ function isAdmin(user) {
+ if (!user) return false;
+ if (user.role === 'admin') return true;
+ const roles = user.roles;
+ if (Array.isArray(roles) && roles.some(function (r) { return r && (r.type === 'admin' || r.type === 'super_admin'); })) return true;
+ return false;
+ }
+ function showAdminCards() {
+ const user = window.Auth ? window.Auth.getUser() : null;
+ if (isAdmin(user)) {
+ const usersCard = document.getElementById('usersCard');
+ if (usersCard) usersCard.style.display = 'block';
+ }
+ }
+ // Ejecutar cuando el DOM y Auth estén listos; repetir una vez por si Auth se hidrata después
+ setTimeout(showAdminCards, 150);
+ setTimeout(showAdminCards, 500);
+</script>
+</body>
+</html>
+

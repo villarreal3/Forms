@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Test de Conexión - Forms</title>
+</head>
+<body>
+ <h1>Test de Conexión a los Servicios</h1>
+ <button onclick="testConnections()">Probar Conexiones</button>
+ <div id="results"></div>
+
+ <!-- Services -->
+ <script type="module">
+ // Importar configuración unificada
+ await import('../services/config.js');
+ </script>
+ <script src="../services/auth.js"></script>
+ <script src="../services/api-client.js"></script>
+ <script src="../services/auth-check.js"></script>
+ <script src="../services/session-timeout.js"></script>
+ <script src="../services/utils.js"></script>
+ <script src="../services/index.js"></script>
+ <script>
+ async function testConnections() {
+ const resultsDiv = document.getElementById('results');
+ resultsDiv.innerHTML = '<div>Probando conexiones...</div>';
+
+ const baseForms = window.API_CONFIG?.FORMS_API_BASE_URL || '';
+ const tests = [
+ {
+ name: 'Servicio Login (Users API)',
+ url: (window.API_CONFIG?.USERS_API_BASE_URL || '') + '/health',
+ expected: 'login'
+ },
+ {
+ name: 'Forms API - Health',
+ url: baseForms + '/health',
+ expected: 'forms'
+ },
+ {
+ name: 'Forms API - Formularios públicos (GET /public/forms)',
+ url: baseForms + '/public/forms',
+ expected: 'forms'
+ }
+ ];
+
+ let results = '';
+
+ for (const test of tests) {
+ try {
+ const response = await fetch(test.url);
+ const contentType = response.headers.get('content-type');
+ let data;
+ 
+ if (contentType && contentType.includes('application/json')) {
+ data = await response.json();
+ } else {
+ data = { text: await response.text() };
+ }
+
+ if (response.ok) {
+ results += `<div>
+ <strong>✅ ${test.name}</strong><br>
+ Status: ${response.status} ${response.statusText}<br>
+ URL: ${test.url}<br>
+ Respuesta: ${JSON.stringify(data)}
+ </div>`;
+ } else {
+ results += `<div>
+ <strong>❌ ${test.name}</strong><br>
+ Status: ${response.status} ${response.statusText}<br>
+ URL: ${test.url}<br>
+ Error: ${JSON.stringify(data)}
+ </div>`;
+ }
+ } catch (error) {
+ results += `<div>
+ <strong>❌ ${test.name}</strong><br>
+ URL: ${test.url}<br>
+ Error: ${error.message}<br>
+ <small>Verifica que el servicio esté corriendo y accesible desde esta IP.</small>
+ </div>`;
+ }
+ }
+
+ resultsDiv.innerHTML = results;
+ }
+
+ // Ejecutar automáticamente al cargar
+ window.addEventListener('load', testConnections);
+ </script>
+ <noscript>
+ <div style="background-color: #f8d7da; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+ <p style="color: #721c24;">Este sitio requiere JavaScript para funcionar correctamente. Por favor, active JavaScript en su navegador.</p>
+ </div>
+ </noscript>
+</body>
+</html>
+

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+ <title>Formularios Disponibles - Forms</title>
+ <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%232563eb' rx='4'/><text x='16' y='22' font-size='18' text-anchor='middle' fill='white'>F</text></svg>">
+
+ <script src="https://cdn.tailwindcss.com"></script>
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+ <style>
+ #qrModalBackdrop {
+ position: fixed;
+ inset: 0;
+ background-color: rgba(0, 0, 0, 0.5);
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ z-index: 9999;
+ }
+ #qrModalBackdrop.hidden { display: none; }
+ #qrModalBackdrop .qr-modal-box {
+ background: white;
+ border-radius: 1rem;
+ padding: 1.5rem;
+ max-width: 90vw;
+ box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+ }
+ #qrModalContent { min-height: 256px; display: flex; justify-content: center; align-items: center; }
+ #qrModalContent canvas, #qrModalContent img { border-radius: 8px; }
+ </style>
+</head>
+
+<body class="bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
+
+<header class="bg-gradient-to-r from-blue-700 to-blue-900 shadow-lg">
+ <div class="container mx-auto px-4 py-6">
+ <div class="flex items-center justify-center space-x-3">
+ <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-md">
+ <i class="fas fa-clipboard-list text-blue-700 text-xl"></i>
+ </div>
+ <div>
+ <h1 class="text-2xl font-bold text-white">Forms</h1>
+ <p class="text-blue-200 text-sm">Sistema de Gestion de Formularios</p>
+ </div>
+ </div>
+ </div>
+</header>
+
+<main class="container mx-auto px-4 py-12">
+ <div class="max-w-4xl mx-auto">
+
+ <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">
+ Formularios Disponibles
+ </h2>
+
+ <div id="loadingState" class="text-center py-12">
+ <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700"></div>
+ <p class="mt-4 text-gray-600">Cargando formularios...</p>
+ </div>
+
+ <div id="errorState" class="hidden bg-red-50 border-l-4 border-red-500 rounded-lg p-6 mb-6">
+ <p id="errorMessage" class="text-red-700 font-semibold"></p>
+ </div>
+
+ <div id="formsList" class="space-y-4"></div>
+
+ <div id="emptyState" class="hidden text-center py-12">
+ <i class="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
+ <p class="text-gray-600 text-lg">No hay formularios disponibles.</p>
+ </div>
+
+ <div id="qrModalBackdrop" class="hidden" aria-hidden="true">
+ <div class="qr-modal-box" role="dialog" aria-modal="true" onclick="event.stopPropagation()">
+ <h3 id="qrModalTitle" class="text-lg font-semibold text-gray-900 mb-4">Codigo QR</h3>
+ <div id="qrModalContent"></div>
+ <p id="qrModalUrl" class="mt-3 text-sm text-gray-600 break-all font-mono"></p>
+ <div class="mt-4 flex justify-end gap-3">
+ <button type="button" id="qrModalDownload" class="px-4 py-2 rounded-lg font-medium bg-blue-800 text-white hover:bg-blue-900 transition-colors inline-flex items-center gap-2">
+ <i class="fas fa-download"></i>
+ Descargar QR
+ </button>
+ <button type="button" id="qrModalClose" class="px-4 py-2 rounded-lg font-medium bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors">
+ Cerrar
+ </button>
+ </div>
+ </div>
+ </div>
+
+ </div>
+</main>
+
+<script>
+ class FormCard {
+ #form;
+
+ constructor(form) {
+ this.#form = form;
+ }
+
+ get eventDate() {
+ return new Date(this.#form.event_date).toLocaleDateString('es-PA', {
+ year: 'numeric', month: 'long', day: 'numeric',
+ hour: '2-digit', minute: '2-digit'
+ });
+ }
+
+ render() {
+ return `
+ <div class="bg-white rounded-xl shadow-lg p-6">
+ <div class="flex justify-between gap-4">
+ <div class="flex-1">
+ <h3 class="text-2xl font-bold mb-2">${this.#form.form_name}</h3>
+ ${this.#form.description ? `<p class="text-gray-600 mb-4">${this.#form.description}</p>` : ''}
+ <p class="text-sm text-gray-500">
+ <i class="fas fa-calendar-alt mr-2"></i>
+ Evento: ${this.eventDate}
+ </p>
+ </div>
+
+ <div class="flex flex-col gap-3">
+ <a href="form/?id=${this.#form.id}" class="bg-blue-800 text-white px-4 py-2 rounded-lg text-sm">
+ Mostrar
+ </a>
+ <button
+ type="button"
+ class="btn-qr-code border border-blue-800 text-blue-800 px-4 py-2 rounded-lg text-sm hover:bg-blue-50 transition-colors"
+ data-form-id="${this.#form.id}"
+ data-form-name="${String(this.#form.form_name).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')}"
+ title="Ver codigo QR">
+ Codigo QR
+ </button>
+ </div>
+ </div>
+ </div>`;
+ }
+ }
+
+ /** Ruta corta para mostrar / compartir (barra de direcciones): forms/form/?id= */
+ function getFormPublicPathDisplay(formId) {
+ return 'forms/form/?id=' + encodeURIComponent(formId);
+ }
+
+ /** URL absoluta para el QR (debe abrir el formulario al escanear). */
+ function getFormPublicUrl(formId) {
+ return new URL('form/?id=' + encodeURIComponent(formId), window.location.href).href;
+ }
+
+ let currentQrFormId = null;
+
+ function openQrModal(formId, formName) {
+ currentQrFormId = formId;
+ const urlAbsoluta = getFormPublicUrl(formId);
+ const backdrop = document.getElementById('qrModalBackdrop');
+ const titleEl = document.getElementById('qrModalTitle');
+ const contentEl = document.getElementById('qrModalContent');
+ const urlEl = document.getElementById('qrModalUrl');
+ if (!backdrop || !contentEl) return;
+ titleEl.textContent = 'Codigo QR - ' + (formName || 'Formulario');
+ urlEl.textContent = getFormPublicPathDisplay(formId);
+ contentEl.innerHTML = '';
+ try {
+ new QRCode(contentEl, {
+ text: urlAbsoluta,
+ width: 256,
+ height: 256,
+ correctLevel: QRCode.CorrectLevel.H
+ });
+ } catch (e) {
+ contentEl.innerHTML = '<p class="text-red-600">Error al generar el codigo QR.</p>';
+ }
+ backdrop.classList.remove('hidden');
+ backdrop.setAttribute('aria-hidden', 'false');
+ }
+
+ function closeQrModal() {
+ const backdrop = document.getElementById('qrModalBackdrop');
+ if (backdrop) {
+ backdrop.classList.add('hidden');
+ backdrop.setAttribute('aria-hidden', 'true');
+ }
+ }
+
+ function downloadQrImage() {
+ const contentEl = document.getElementById('qrModalContent');
+ if (!contentEl) return;
+ const canvas = contentEl.querySelector('canvas');
+ const img = contentEl.querySelector('img');
+ const el = canvas || img;
+ if (!el) return;
+ const url = el instanceof HTMLCanvasElement
+ ? el.toDataURL('image/png')
+ : (img.currentSrc || img.src);
+ const a = document.createElement('a');
+ a.href = url;
+ a.download = currentQrFormId ? 'qr-formulario-' + currentQrFormId + '.png' : 'qr-formulario.png';
+ a.rel = 'noopener';
+ document.body.appendChild(a);
+ a.click();
+ document.body.removeChild(a);
+ }
+
+ class FormsApp {
+ #container = document.getElementById('formsList');
+
+ async init() {
+ try {
+ if (!window.getPublicForms) {
+ throw new Error('Las funciones de API no estan disponibles. Verifica que config.js se haya cargado correctamente.');
+ }
+ const response = await window.getPublicForms();
+ const forms = response.forms || response || [];
+
+ document.getElementById('loadingState').classList.add('hidden');
+
+ if (!forms?.length) {
+ document.getElementById('emptyState').classList.remove('hidden');
+ return;
+ }
+
+ this.#container.innerHTML = forms
+ .map(f => new FormCard(f).render())
+ .join('');
+
+ this.#container.addEventListener('click', (e) => {
+ const btn = e.target.closest('.btn-qr-code');
+ if (!btn) return;
+ const formId = btn.getAttribute('data-form-id');
+ const formName = btn.getAttribute('data-form-name') || '';
+ if (formId) openQrModal(formId, formName);
+ });
+
+ } catch (e) {
+ document.getElementById('errorState').classList.remove('hidden');
+ document.getElementById('errorMessage').textContent = e.message;
+ }
+ }
+ }
+
+ (function setupQrModalClose() {
+ const backdrop = document.getElementById('qrModalBackdrop');
+ const closeBtn = document.getElementById('qrModalClose');
+ const downloadBtn = document.getElementById('qrModalDownload');
+ if (backdrop) {
+ backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeQrModal(); });
+ }
+ if (closeBtn) closeBtn.addEventListener('click', closeQrModal);
+ if (downloadBtn) downloadBtn.addEventListener('click', downloadQrImage);
+ })();
+
+ import('./services/config.js').then(() => {
+ setTimeout(() => {
+ if (typeof window.getPublicForms === 'undefined') {
+ const errorState = document.getElementById('errorState');
+ const errorMessage = document.getElementById('errorMessage');
+ if (errorState && errorMessage) {
+ document.getElementById('loadingState')?.classList.add('hidden');
+ errorState.classList.remove('hidden');
+ errorMessage.textContent = 'Error al cargar las funciones de API. Por favor, recarga la pagina.';
+ }
+ return;
+ }
+
+ if (document.readyState === 'loading') {
+ document.addEventListener('DOMContentLoaded', () => new FormsApp().init());
+ } else {
+ new FormsApp().init();
+ }
+ }, 100);
+ }).catch(error => {
+ const errorState = document.getElementById('errorState');
+ const errorMessage = document.getElementById('errorMessage');
+ if (errorState && errorMessage) {
+ document.getElementById('loadingState')?.classList.add('hidden');
+ errorState.classList.remove('hidden');
+ errorMessage.textContent = 'Error al cargar la configuracion: ' + error.message;
+ }
+ });
+ </script>
+
+
+</body>
+</html>
+

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+ <html lang="es">
+ <head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <link rel="stylesheet" href="../index.css">
+ <link rel="stylesheet" href="../shared/sidebar.css">
+ <link rel="stylesheet" href="index.css">
+ <title>Formularios - Forms</title>
+ </head>
+ <body>
+ <div class="app-container">
+ <button class="nav-toggle" aria-label="Abrir menú" aria-expanded="false">
+ <span></span>
+ <span></span>
+ <span></span>
+ </button>
+ 
+ <header id="navbar"></header>
+ 
+ <main class="main-content">
+ <!-- Header -->
+ <div class="page-header">
+ <div class="page-header-content">
+ <h1>Formularios</h1>
+ <p>Gestiona tus formularios</p>
+ </div>
+ <div class="page-header-actions">
+ <a href="../../" class="page-header-link">
+ Ver Formularios Públicos
+ </a>
+ <a href="actions/create/" class="page-header-button">
+ Nuevo Formulario
+ </a>
+ </div>
+ </div>
+
+ <!-- Lista de formularios -->
+ <div id="formsContainer" class="forms-container">
+ <div class="forms-loading">
+ <div class="forms-loading-spinner">
+ <div class="forms-loading-spinner-inner"></div>
+ </div>
+ <p>Cargando formularios...</p>
+ </div>
+ </div>
+ 
+ <footer class="main-footer">
+ © 2025 Proyecto Forms. Todos los derechos reservados.
+ </footer>
+ </main>
+ </div>
+
+ <!-- Bootstrap (carga todos los módulos) -->
+ <script type="module" src="../../utils/bootstrap.js"></script>
+ <!-- Page scripts -->
+ <script type="module" src="../shared/customization.js"></script>
+ <script type="module" src="../shared/form_sections.js"></script>
+ <script type="module" src="../shared/formularios.js"></script>
+ <script type="module" src="index.js"></script>
+ <!-- Nav Toggle Script -->
+ <script src="../shared/nav-toggle.js"></script>
+ <script type="module">
+ // Establecer página actual para el layout
+ window.page = 'formularios';
+ 
+ // Inicializar la página de formularios
+ import { initFormsPage } from './index.js';
+ initFormsPage();
+ </script>
+ </body>
+ </html>

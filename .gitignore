@@ -1,0 +1,75 @@
+# Entorno y secretos (nunca versionar)
+.env
+.env.*
+!.env.example
+!.env.template
+!.env*.example
+*.pem
+*.key
+
+# Dependencias y artefactos de build
+node_modules/
+**/node_modules/
+dist/
+build/
+.next/
+out/
+coverage/
+.nyc_output/
+*.tsbuildinfo
+
+# Go
+vendor/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+forms-api/forms/app
+
+# Logs y temporales
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+*.swp
+*.swo
+*~
+.tmp/
+temp/
+tmp/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Windows / WSL: metadatos de zonas de seguridad (nombre:Zone.Identifier)
+**/*Zone.Identifier
+**/*:Zone.Identifier
+*:Zone.Identifier
+
+# IDEs y editores
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Docker (volúmenes locales opcionales)
+.docker/
+
+# Miscelánea
+*.local

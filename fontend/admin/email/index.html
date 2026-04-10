@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <link rel="stylesheet" href="../index.css">
+ <link rel="stylesheet" href="../shared/sidebar.css">
+ <link rel="stylesheet" href="index.css">
+ <title>Correos Masivos - Forms</title>
+</head>
+<body>
+ <div class="app-container">
+ <button class="nav-toggle" aria-label="Abrir menú" aria-expanded="false">
+ <span></span>
+ <span></span>
+ <span></span>
+ </button>
+
+ <header id="navbar"></header>
+ 
+ <main class="main-content">
+ <!-- Header -->
+ <div class="page-header">
+ <div>
+ <h1>Correos Masivos</h1>
+ <p>Envía correos electrónicos a múltiples destinatarios</p>
+ </div>
+ </div>
+
+ <!-- Formulario de correo -->
+ <section class="correos-form-section">
+ <h2>Nuevo Correo Masivo</h2>
+ <form id="emailForm">
+ <div class="form-group">
+ <label>Destinatarios <span>*</span></label>
+ <select id="emailRecipients" multiple>
+ <option value="all_users">Todos los usuarios</option>
+ </select>
+ <p class="form-help-text">Mantén presionada la tecla Ctrl (Cmd en Mac) para seleccionar múltiples opciones.</p>
+ </div>
+ <div class="form-group">
+ <label>Destinatarios personalizados (opcional)</label>
+ <textarea id="emailCustomRecipients" rows="3" placeholder="Ingresa emails separados por comas o líneas"></textarea>
+ <p class="form-help-text">Puedes agregar emails adicionales separados por comas.</p>
+ </div>
+ <div class="form-group">
+ <label>Asunto <span>*</span></label>
+ <input type="text" id="emailSubject" required>
+ </div>
+ <div class="form-group">
+ <label>Cuerpo del Mensaje (HTML) <span>*</span></label>
+ <textarea id="emailBody" rows="10" required placeholder="Escribe el contenido del correo en HTML. Puedes usar variables: {RECIPIENT_NAME}, {EMAIL}"></textarea>
+ <p class="form-help-text">Usa HTML para formatear el correo. Variables disponibles: {RECIPIENT_NAME}, {EMAIL}</p>
+ </div>
+ <div class="form-group">
+ <label>Cuerpo del Mensaje (Texto plano - opcional)</label>
+ <textarea id="emailBodyText" rows="5" placeholder="Versión en texto plano del correo"></textarea>
+ </div>
+
+ <div class="correos-actions">
+ <button type="submit" class="btn btn-primary">
+ <span>Enviar Correos</span>
+ </button>
+ </div>
+ </form>
+ </section>
+
+ <!-- Información -->
+ <section class="info-section">
+ <div class="info-content">
+ <div class="info-icon"></div>
+ <div class="info-text">
+ <h3>Información</h3>
+ <div class="info-description">
+ <p>Los correos se enviarán a todos los destinatarios seleccionados.</p>
+ <p>Puedes usar las siguientes variables en el cuerpo del mensaje:</p>
+ <ul>
+ <li><strong>{RECIPIENT_NAME}</strong> - Nombre del destinatario</li>
+ <li><strong>{EMAIL}</strong> - Email del destinatario</li>
+ </ul>
+ <p>Los correos se enviarán de forma masiva. Asegúrate de verificar el contenido antes de enviar.</p>
+ </div>
+ </div>
+ </div>
+ </section>
+ 
+ <footer class="main-footer">
+ © 2025 Proyecto Forms. Todos los derechos reservados.
+ </footer>
+ </main>
+ </div>
+
+ <!-- Bootstrap (carga todos los módulos) -->
+ <script type="module" src="../../utils/bootstrap.js"></script>
+ <!-- Nav Toggle Script -->
+ <script src="../shared/nav-toggle.js"></script>
+ <!-- Page scripts -->
+ <script type="module" src="index.js"></script>
+ <script>
+ // Establecer página actual para el layout
+ window.page = 'correos';
+ </script>
+</body>
+</html>

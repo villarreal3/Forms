@@ -1,0 +1,121 @@
+/* ===== CONFIG PAGE STYLES ===== */
+
+/* ===== CONFIG PAGE STYLES ===== */
+
+/* Page Header */
+.main-content > div:first-child {
+  margin-bottom: var(--spacing-xl);
+}
+
+.main-content > div:first-child h1 {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.main-content > div:first-child p {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-base);
+}
+
+/* Config Cards Grid */
+.config-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(30rem, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.config-card {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.config-card > div {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.config-card:hover > div {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-0.2rem);
+  border-color: var(--color-primary);
+}
+
+.config-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 6rem;
+  height: 6rem;
+  background: color-mix(in srgb, var(--color-primary) 15%, transparent);
+  border-radius: var(--border-radius-lg);
+  margin-bottom: var(--spacing-sm);
+}
+
+.config-card-icon > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+}
+
+.config-card-icon svg {
+  width: 3.6rem;
+  height: 3.6rem;
+}
+
+.config-card h3 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.config-card p {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Tarjeta Usuarios: oculta por defecto, visible solo si JS la muestra (admin) */
+#usersCard {
+  display: none;
+}
+
+#usersCard[style*="display: block"] {
+  display: block !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .config-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .config-card > div {
+    padding: var(--spacing-lg);
+  }
+  
+  .config-card-icon {
+    width: 5rem;
+    height: 5rem;
+  }
+  
+  .config-card-icon svg {
+    width: 3rem;
+    height: 3rem;
+  }
+}
+

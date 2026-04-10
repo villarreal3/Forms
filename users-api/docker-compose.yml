@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: users-db
+    restart: always
+    environment:
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: app_password
+      POSTGRES_DB: users_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U app_user']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - shared
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: users-api
+    restart: always
+    ports:
+      - '3000:3000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: app_user
+      DB_PASSWORD: app_password
+      DB_DATABASE: users_db
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - shared
+
+volumes:
+  postgres_data:
+
+networks:
+  shared:
+    name: forms-users-shared

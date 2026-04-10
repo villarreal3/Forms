@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <link rel="stylesheet" href="../../../index.css">
+ <link rel="stylesheet" href="../../../shared/sidebar.css">
+ <link rel="stylesheet" href="index.css">
+ <title>Ver Formulario - Forms</title>
+</head>
+<body>
+ <div class="app-container">
+ <button class="nav-toggle" aria-label="Abrir menú" aria-expanded="false">
+ <span></span>
+ <span></span>
+ <span></span>
+ </button>
+ 
+ <header id="navbar"></header>
+ 
+ <main class="main-content">
+ <!-- Header -->
+ <div class="page-header">
+ <div class="page-header-content">
+ <h1>Detalles del Formulario</h1>
+ <p id="formTitle">Cargando...</p>
+ </div>
+ <div class="page-header-actions">
+ <a href="../../" class="back-link">
+ ← Volver a Formularios
+ </a>
+ </div>
+ </div>
+
+ <!-- Contenido del formulario -->
+ <div id="formDetailsContent" class="form-details-content">
+ <!-- Columna lateral: Información del Formulario (PC) -->
+ <div class="form-info-sidebar">
+ <h4>Información del Formulario</h4>
+ <div>
+ <div class="form-info-item">
+ <label>Nombre</label>
+ <p id="formDetailsName"></p>
+ </div>
+ <div class="form-info-item">
+ <label>Estado</label>
+ <div id="formDetailsStatus"></div>
+ </div>
+ <div class="form-info-actions">
+ <button type="button" id="formDetailsPublishBtn" class="btn btn-primary" style="display:none;">Publicar</button>
+ <button type="button" id="formDetailsDraftBtn" class="btn btn-secondary" style="display:none;">Pasar a borrador</button>
+ </div>
+ <div class="form-info-item">
+ <label>Fecha de Creación</label>
+ <p id="formDetailsCreated"></p>
+ </div>
+ <div class="form-info-item">
+ <label>Fecha de Expiración</label>
+ <p id="formDetailsExpires"></p>
+ </div>
+ <div class="form-info-item">
+ <label>Fecha del Evento</label>
+ <p id="formDetailsEventDate"></p>
+ </div>
+ <div class="form-info-item">
+ <label>Fecha de Apertura</label>
+ <p id="formDetailsOpenAt"></p>
+ </div>
+ <div class="form-info-item">
+ <label>Límite de inscripciones</label>
+ <p id="formDetailsInscriptionLimit"></p>
+ </div>
+ <div class="form-info-item">
+ <label>Conferencista</label>
+ <p id="formDetailsConferencista"></p>
+ </div>
+ <div class="form-info-item">
+ <label>Ubicación</label>
+ <p id="formDetailsUbicacion"></p>
+ </div>
+ <div class="form-info-item">
+ <label>Descripción</label>
+ <p id="formDetailsDescription"></p>
+ </div>
+ </div>
+ </div>
+
+ <!-- Columna principal: Contenido (Secciones/Campos) -->
+ <div>
+ <!-- Acordeón para información del formulario (móvil/tablet) -->
+ <div class="form-info-accordion">
+ <button class="accordion-button" onclick="toggleFormInfoAccordion()">
+ <span>Información del Formulario</span>
+ <span>▼</span>
+ </button>
+ <div id="formInfoAccordionContent" class="accordion-content">
+ <div>
+ <div class="form-info-item">
+ <label>Nombre</label>
+ <p id="formDetailsNameMobile"></p>
+ </div>
+ <div class="form-info-item">
+ <label>Estado</label>
+ <div id="formDetailsStatusMobile"></div>
+ </div>
+ <div class="form-info-actions">
+ <button type="button" id="formDetailsPublishBtnMobile" class="btn btn-primary" style="display:none;">Publicar</button>
+ <button type="button" id="formDetailsDraftBtnMobile" class="btn btn-secondary" style="display:none;">Pasar a borrador</button>
+ </div>
+ <div class="form-info-item">
+ <label>Fecha de Creación</label>
+ <p id="formDetailsCreatedMobile"></p>
+ </div>
+ <div class="form-info-item">
+ <label>Fecha de Expiración</label>
+ <p id="formDetailsExpiresMobile"></p>
+ </div>
+ <div class="form-info-item">
+ <label>Fecha del Evento</label>
+ <p id="formDetailsEventDateMobile"></p>
+ </div>
+ <div class="form-info-item">
+ <label>Fecha de Apertura</label>
+ <p id="formDetailsOpenAtMobile"></p>
+ </div>
+ <div class="form-info-item">
+ <label>Límite de inscripciones</label>
+ <p id="formDetailsInscriptionLimitMobile"></p>
+ </div>
+ <div class="form-info-item">
+ <label>Conferencista</label>
+ <p id="formDetailsConferencistaMobile"></p>
+ </div>
+ <div class="form-info-item">
+ <label>Ubicación</label>
+ <p id="formDetailsUbicacionMobile"></p>
+ </div>
+ <div class="form-info-item">
+ <label>Descripción</label>
+ <p id="formDetailsDescriptionMobile"></p>
+ </div>
+ </div>
+ </div>
+ </div>
+
+ <!-- Sistema de Tabs -->
+ <div class="tabs-container">
+ <div class="tabs-header">
+ <div class="tabs-list">
+ <button id="tabSections" class="tab-button active" onclick="switchTab('sections')">
+ <span>Secciones</span>
+ </button>
+ <button id="tabFields" class="tab-button" onclick="switchTab('fields')">
+ <span>Campos</span>
+ </button>
+ <button id="tabPersonalize" class="tab-button" onclick="switchTab('personalize')">
+ <span>Personalizar</span>
+ </button>
+ <button id="tabSchema" class="tab-button" onclick="switchTab('schema')">
+ <span>Esquema (JSON)</span>
+ </button>
+ </div>
+ <div class="tabs-actions">
+ <button id="addSectionButton" class="tab-action-button" onclick="openCreateSectionModal()">
+ <span>Añadir Sección</span>
+ </button>
+ <button id="addFieldButton" class="tab-action-button" onclick="openAddFieldModal()">
+ <span>Añadir Campo</span>
+ </button>
+ </div>
+ </div>
+
+ <!-- Contenido de Tabs -->
+ <div>
+ <!-- Tab: Secciones -->
+ <div id="tabContentSections" class="tab-content active">
+ <div id="formDetailsSections">
+ <!-- Las secciones se cargarán aquí -->
+ </div>
+ </div>
+
+ <!-- Tab: Campos -->
+ <div id="tabContentFields" class="tab-content">
+ <div id="formDetailsFields">
+ <!-- Los campos se cargarán aquí -->
+ </div>
+ </div>
+
+ <!-- Tab: Esquema JSON (table-per-form) -->
+ <div id="tabContentSchema" class="tab-content">
+ <div class="schema-editor">
+ <p class="schema-info">
+ Si el formulario <strong>no tiene respuestas</strong>, al guardar se recrea la tabla <code>form_<em>id</em>_responses</code>.
+ Con respuestas existentes solo se actualiza el JSON en BD (la tabla física no se altera automáticamente).
+ </p>
+ <label for="schemaJsonEditor" class="schema-label">forms.schema</label>
+ <textarea id="schemaJsonEditor" class="schema-json-editor" rows="20" style="min-height:320px"></textarea>
+ <div class="schema-actions">
+ <button type="button" id="schemaSaveBtn" class="schema-action-button schema-action-button--primary">Guardar esquema</button>
+ <button type="button" id="schemaFormatBtn" class="schema-action-button">Formatear JSON</button>
+ </div>
+ <p id="schemaSaveMsg" class="schema-save-msg hidden"></p>
+ </div>
+ </div>
+
+ <!-- Tab: Personalizar -->
+ <div id="tabContentPersonalize" class="tab-content">
+ <form id="customizationForm">
+ <!-- Imagen del Formulario - PC -->
+ <div class="customization-image-section">
+ <label>Imagen para PC</label>
+ <div class="customization-image-upload">
+ <div class="customization-image-input-wrapper">
+ <input
+ type="file"
+ id="formImageInput"
+ accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+ onchange="previewImage(this, 'desktop')"
+ >
+ <p>Formatos: JPG, PNG, GIF, WEBP (máx. 5MB)</p>
+ </div>
+ <button type="button" id="uploadPcBtn" onclick="uploadFormImage('desktop')">
+ <span>Subir</span>
+ </button>
+ </div>
+ <div id="imagePreviewPc">
+ <div>
+ <img id="previewImgPc" src="" alt="Preview PC">
+ <button type="button" onclick="deleteFormImage('desktop')" title="Eliminar imagen">×</button>
+ </div>
+ </div>
+ <div id="currentImagePc">
+ <p>Imagen actual:</p>
+ <div>
+ <img id="currentImgPc" src="" alt="Imagen actual PC">
+ <button type="button" onclick="deleteFormImage('desktop')" title="Eliminar imagen">×</button>
+ </div>
+ </div>
+ </div>
+
+ <!-- Imagen del Formulario - Móvil/Tablet -->
+ <div class="customization-image-section">
+ <label>Imagen para Móvil/Tablet</label>
+ <div class="customization-image-upload">
+ <div class="customization-image-input-wrapper">
+ <input
+ type="file"
+ id="formImageInputMobile"
+ accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+ onchange="previewImage(this, 'mobile')"
+ >
+ <p>Formatos: JPG, PNG, GIF, WEBP (máx. 5MB)</p>
+ </div>
+ <button type="button" id="uploadMobileBtn" onclick="uploadFormImage('mobile')">
+ <span>Subir</span>
+ </button>
+ </div>
+ <div id="imagePreviewMobile">
+ <div>
+ <img id="previewImgMobile" src="" alt="Preview Móvil">
+ <button type="button" onclick="deleteFormImage('mobile')" title="Eliminar imagen">×</button>
+ </div>
+ </div>
+ <div id="currentImageMobile">
+ <p>Imagen actual:</p>
+ <div>
+ <img id="currentImgMobile" src="" alt="Imagen actual Móvil">
+ <button type="button" onclick="deleteFormImage('mobile')" title="Eliminar imagen">×</button>
+ </div>
+ </div>
+ </div>
+
+ <!-- Colores -->
+ <div class="customization-colors-section">
+ <div class="customization-color-item">
+ <label>Color Principal</label>
+ <div class="customization-color-inputs">
+ <input type="color" id="primaryColor" value="#3B82F6">
+ <input type="text" id="primaryColorText" value="#3B82F6" pattern="^#[0-9A-Fa-f]{6}$">
+ </div>
+ </div>
+ <div class="customization-color-item">
+ <label>Color Secundario</label>
+ <div class="customization-color-inputs">
+ <input type="color" id="secondaryColor" value="#1E40AF">
+ <input type="text" id="secondaryColorText" value="#1E40AF" pattern="^#[0-9A-Fa-f]{6}$">
+ </div>
+ </div>
+ <div class="customization-color-item">
+ <label>Color de Fondo</label>
+ <div class="customization-color-inputs">
+ <input type="color" id="backgroundColor" value="#FFFFFF">
+ <input type="text" id="backgroundColorText" value="#FFFFFF" pattern="^#[0-9A-Fa-f]{6}$">
+ </div>
+ </div>
+ <div class="customization-color-item">
+ <label>Color de Texto</label>
+ <div class="customization-color-inputs">
+ <input type="color" id="textColor" value="#1F2937">
+ <input type="text" id="textColorText" value="#1F2937" pattern="^#[0-9A-Fa-f]{6}$">
+ </div>
+ </div>
+ <div class="customization-color-item">
+ <label>Color de Título</label>
+ <div class="customization-color-inputs">
+ <input type="color" id="titleColor" value="#FFFFFF">
+ <input type="text" id="titleColorText" value="#FFFFFF" pattern="^#[0-9A-Fa-f]{6}$">
+ </div>
+ </div>
+ </div>
+
+ <!-- Personalización de Contenedores -->
+ <div class="customization-containers-section">
+ <h4>Personalización de Contenedores</h4>
+
+ <!-- Contenedor del Formulario -->
+ <div class="customization-container-item">
+ <label>Contenedor del Formulario</label>
+ <div class="customization-container-properties">
+ <div class="customization-container-property">
+ <label>Color</label>
+ <div class="customization-color-inputs">
+ <input type="color" id="formContainerColor" value="#FFFFFF">
+ <input type="text" id="formContainerColorText" value="#FFFFFF" pattern="^#[0-9A-Fa-f]{6}$">
+ </div>
+ </div>
+ <div class="customization-container-property">
+ <label>Opacidad (0-100%)</label>
+ <div class="customization-opacity-inputs">
+ <input
+ type="range"
+ id="formContainerOpacity"
+ min="0"
+ max="100"
+ value="100"
+ step="1"
+ oninput="(function(){const el = document.getElementById('formContainerOpacityText'); if(el) el.value = this.value + '%'; if(typeof updatePreview === 'function') updatePreview();}).call(this);"
+ >
+ <input type="text" id="formContainerOpacityText" value="100%" readonly>
+ </div>
+ </div>
+ </div>
+ </div>
+
+ <!-- Contenedor de Descripción -->
+ <div class="customization-container-item">
+ <label>Contenedor de Descripción</label>
+ <div class="customization-container-properties">
+ <div class="customization-container-property">
+ <label>Color</label>
+ <div class="customization-color-inputs">
+ <input type="color" id="descriptionContainerColor" value="#FFFFFF">
+ <input type="text" id="descriptionContainerColorText" value="#FFFFFF" pattern="^#[0-9A-Fa-f]{6}$">
+ </div>
+ </div>
+ <div class="customization-container-property">
+ <label>Opacidad (0-100%)</label>
+ <div class="customization-opacity-inputs">
+ <input
+ type="range"
+ id="descriptionContainerOpacity"
+ min="0"
+ max="100"
+ value="100"
+ step="1"
+ oninput="(function(){const el = document.getElementById('descriptionContainerOpacityText'); if(el) el.value = this.value + '%'; if(typeof updatePreview === 'function') updatePreview();}).call(this);"
+ >
+ <input type="text" id="descriptionContainerOpacityText" value="100%" readonly>
+ </div>
+ </div>
+ </div>
+ </div>
+
+ <!-- Franja Meta (formMetaStrip) -->
+ <div class="customization-container-item">
+ <label>Franja Meta (Descripción + Horario)</label>
+ <div class="customization-container-properties">
+ <div class="customization-container-property">
+ <label>Color de Fondo (Inicio)</label>
+ <div class="customization-color-inputs">
+ <input type="color" id="formMetaBackgroundStartColor" value="#3B82F6">
+ <input type="text" id="formMetaBackgroundStartColorText" value="#3B82F6" pattern="^#[0-9A-Fa-f]{6}$">
+ </div>
+ </div>
+ <div class="customization-container-property">
+ <label>Color de Fondo (Fin)</label>
+ <div class="customization-color-inputs">
+ <input type="color" id="formMetaBackgroundEndColor" value="#1E40AF">
+ <input type="text" id="formMetaBackgroundEndColorText" value="#1E40AF" pattern="^#[0-9A-Fa-f]{6}$">
+ </div>
+ </div>
+ <div class="customization-container-property">
+ <label>Opacidad de Fondo (0-100%)</label>
+ <div class="customization-opacity-inputs">
+ <input
+ type="range"
+ id="formMetaBackgroundOpacity"
+ min="0"
+ max="100"
+ value="100"
+ step="1"
+ oninput="(function(){const el = document.getElementById('formMetaBackgroundOpacityText'); if(el) el.value = this.value + '%'; if(typeof updatePreview === 'function') updatePreview();}).call(this);"
+ >
+ <input type="text" id="formMetaBackgroundOpacityText" value="100%" readonly>
+ </div>
+ </div>
+ <div class="customization-container-property">
+ <label>Color de Texto</label>
+ <div class="customization-color-inputs">
+ <input type="color" id="formMetaTextColor" value="#FFFFFF">
+ <input type="text" id="formMetaTextColorText" value="#FFFFFF" pattern="^#[0-9A-Fa-f]{6}$">
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+
+ <!-- Preview -->
+ <div class="customization-preview-section">
+ <label>Vista Previa</label>
+ <div id="colorPreview">
+ <div>
+ <div id="previewLogo">
+ <img id="previewLogoImg" src="" alt="Logo">
+ </div>
+ <h3>Título del Formulario</h3>
+ <p>Descripción del formulario</p>
+ <button>Botón Principal</button>
+ </div>
+ </div>
+ </div>
+
+ <div>
+ <button type="submit">Guardar Cambios</button>
+ </div>
+ </form>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ 
+ <footer class="main-footer">
+ © 2025 Proyecto Forms. Todos los derechos reservados.
+ </footer>
+ </main>
+ </div>
+
+ <!-- Modal Editar Campo -->
+ <div id="editFieldModal" class="modal">
+ <div class="modal-overlay" onclick="closeEditFieldModal()"></div>
+ <div class="modal-content">
+ <div class="modal-header">
+ <h3>Editar Campo</h3>
+ <button class="modal-close" onclick="closeEditFieldModal()">×</button>
+ </div>
+ <div class="modal-body">
+ <form id="editFieldForm">
+ <div class="modal-form-group">
+ <label>Etiqueta del Campo <span>*</span></label>
+ <input type="text" id="editFieldLabel" required placeholder="Ej: Nombre completo">
+ </div>
+ <div class="modal-form-group">
+ <label>Nombre del Campo <span>*</span></label>
+ <input type="text" id="editFieldName" required placeholder="Ej: full_name">
+ <p>Solo letras, números y guiones bajos</p>
+ </div>
+ <div class="modal-form-group">
+ <label>Tipo de Campo <span>*</span></label>
+ <select id="editFieldType" required onchange="handleEditFieldTypeChange()">
+ <option value="">Selecciona un tipo</option>
+ <option value="text">Texto</option>
+ <option value="number">Número</option>
+ <option value="email">Email</option>
+ <option value="textarea">Área de texto</option>
+ <option value="date">Fecha</option>
+ <option value="select">Selección</option>
+ <option value="checkbox">Casilla</option>
+ </select>
+ </div>
+ <div class="modal-form-group" id="editFieldOptionsContainer">
+ <label>Opciones (separadas por comas) <span>*</span></label>
+ <input type="text" id="editFieldOptions" placeholder="Ej: Opción 1, Opción 2, Opción 3">
+ <p>Solo para campos de tipo "Selección"</p>
+ </div>
+ <div class="modal-form-group">
+ <label>
+ <input type="checkbox" id="editFieldRequired">
+ <span>Campo requerido</span>
+ </label>
+ </div>
+ <div class="modal-form-group">
+ <label>Límite de caracteres (opcional)</label>
+ <input type="number" id="editFieldMaxLength" min="1" max="50000" placeholder="Sin límite">
+ <p>Máximo de caracteres permitidos. Vacío = sin límite.</p>
+ </div>
+ <div class="modal-footer">
+ <button type="button" class="modal-button modal-button-secondary" onclick="closeEditFieldModal()">Cancelar</button>
+ <button type="submit" class="modal-button modal-button-primary">Guardar Cambios</button>
+ </div>
+ </form>
+ </div>
+ </div>
+ </div>
+
+ <!-- Modal Crear/Editar Sección -->
+ <div id="sectionModal" class="modal">
+ <div class="modal-overlay" onclick="closeSectionModal()"></div>
+ <div class="modal-content">
+ <div class="modal-header">
+ <h3 id="sectionModalTitle">Crear Sección</h3>
+ <button class="modal-close" onclick="closeSectionModal()">×</button>
+ </div>
+ <div class="modal-body">
+ <form id="sectionForm">
+ <input type="hidden" id="sectionFormId">
+ <input type="hidden" id="sectionFormFormId">
+ <div class="modal-form-group">
+ <label>Título de la Sección <span>*</span></label>
+ <input type="text" id="sectionTitle" required placeholder="Ej: Información Personal">
+ </div>
+ <div class="modal-form-group">
+ <label>Icono <span>*</span></label>
+ <div>
+ <div>
+ <input type="text" id="sectionIcon" required placeholder="Ej: user" oninput="updateIconPreview()">
+ <p>Nombre de icono Heroicons (ej: user, envelope, information-circle)</p>
+ </div>
+ <div>
+ <div id="iconPreview"></div>
+ </div>
+ </div>
+ <div>
+ <button type="button" class="modal-button modal-button-secondary" onclick="openIconSelector()">Buscar icono</button>
+ </div>
+ </div>
+ <div class="modal-footer">
+ <button type="button" class="modal-button modal-button-secondary" onclick="closeSectionModal()">Cancelar</button>
+ <button type="submit" class="modal-button modal-button-primary">Guardar</button>
+ </div>
+ </form>
+ </div>
+ </div>
+ </div>
+
+ <!-- Modal Selector de Iconos -->
+ <div id="iconSelectorModal" class="modal">
+ <div class="modal-overlay" onclick="closeIconSelector()"></div>
+ <div class="modal-content">
+ <div class="modal-header">
+ <h3>Seleccionar Icono</h3>
+ <button class="modal-close" onclick="closeIconSelector()">×</button>
+ </div>
+ <div class="modal-body">
+ <div class="modal-form-group">
+ <input type="text" id="iconSearch" placeholder="Buscar icono..." oninput="filterIcons()">
+ </div>
+ <div id="iconGrid">
+ <!-- Los iconos se cargarán aquí -->
+ </div>
+ </div>
+ </div>
+ </div>
+
+ <!-- Modal Añadir Campo -->
+ <div id="addFieldModal" class="modal">
+ <div class="modal-overlay" onclick="closeAddFieldModal()"></div>
+ <div class="modal-content">
+ <div class="modal-header">
+ <h3>Añadir Nuevo Campo</h3>
+ <button class="modal-close" onclick="closeAddFieldModal()">×</button>
+ </div>
+ <div class="modal-body">
+ <form id="addFieldForm">
+ <div class="modal-form-group">
+ <label>Etiqueta del Campo <span>*</span></label>
+ <input type="text" id="fieldLabel" required placeholder="Ej: Nombre completo">
+ </div>
+ <div class="modal-form-group">
+ <label>Nombre del Campo <span>*</span></label>
+ <input type="text" id="fieldName" required placeholder="Ej: full_name">
+ <p>Solo letras, números y guiones bajos</p>
+ </div>
+ <div class="modal-form-group">
+ <label>Tipo de Campo <span>*</span></label>
+ <select id="fieldType" required onchange="handleFieldTypeChange()">
+ <option value="">Selecciona un tipo</option>
+ <option value="text">Texto</option>
+ <option value="number">Número</option>
+ <option value="email">Email</option>
+ <option value="textarea">Área de texto</option>
+ <option value="date">Fecha</option>
+ <option value="select">Selección</option>
+ <option value="checkbox">Casilla</option>
+ </select>
+ </div>
+ <div class="modal-form-group" id="fieldOptionsContainer">
+ <label>Opciones (separadas por comas) <span>*</span></label>
+ <input type="text" id="fieldOptions" placeholder="Ej: Opción 1, Opción 2, Opción 3">
+ <p>Solo para campos de tipo "Selección"</p>
+ </div>
+ <div class="modal-form-group">
+ <label>
+ <input type="checkbox" id="fieldRequired">
+ <span>Campo requerido</span>
+ </label>
+ </div>
+ <div class="modal-form-group">
+ <label>Límite de caracteres (opcional)</label>
+ <input type="number" id="fieldMaxLength" min="1" max="50000" placeholder="Sin límite">
+ <p>Máximo de caracteres permitidos. Vacío = sin límite.</p>
+ </div>
+ <div class="modal-footer">
+ <button type="button" class="modal-button modal-button-secondary" onclick="closeAddFieldModal()">Cancelar</button>
+ <button type="submit" class="modal-button modal-button-primary">Añadir Campo</button>
+ </div>
+ </form>
+ </div>
+ </div>
+ </div>
+
+ <!-- Bootstrap (carga todos los módulos) -->
+ <script type="module" src="../../../../utils/bootstrap.js"></script>
+ <!-- Nav Toggle Script -->
+ <script src="../../../shared/nav-toggle.js"></script>
+ <!-- Page scripts -->
+ <script type="module" src="../../../shared/customization.js"></script>
+ <script type="module" src="../../../shared/form_sections.js"></script>
+ <script type="module" src="../../../shared/formularios.js"></script>
+ <script type="module" src="index.js"></script>
+ <script>
+ // Establecer página actual para el layout
+ window.page = 'formularios';
+ </script>
+</body>
+</html>

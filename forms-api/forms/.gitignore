@@ -1,0 +1,32 @@
+# Binarios
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+app
+
+# Archivos de prueba
+*.test
+*.out
+
+# Archivos de Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Variables de entorno
+.env
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+

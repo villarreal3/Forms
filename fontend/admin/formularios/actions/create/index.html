@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <link rel="stylesheet" href="../../../index.css">
+ <link rel="stylesheet" href="../../../shared/sidebar.css">
+ <link rel="stylesheet" href="index.css">
+ <title>Crear Formulario - Forms</title>
+</head>
+<body>
+ <div class="app-container">
+ <button class="nav-toggle" aria-label="Abrir menú" aria-expanded="false">
+ <span></span>
+ <span></span>
+ <span></span>
+ </button>
+ 
+ <header id="navbar"></header>
+ 
+ <main class="main-content">
+ <div class="form-container">
+ <a href="../../" class="back-link">
+ ← Volver a Formularios
+ </a>
+
+ <div class="form-header">
+ <h1>Crear Nuevo Formulario</h1>
+ <p>Completa la información básica del formulario. Podrás agregar campos y personalizarlo después.</p>
+ </div>
+
+ <div class="form-card">
+ <form id="createFormForm">
+ <div class="form-group">
+ <label>
+ Nombre del Formulario <span>*</span>
+ </label>
+ <input
+ type="text"
+ id="formName"
+ name="formName"
+ required
+ placeholder="Ej: Formulario de Inscripción"
+ autocomplete="off"
+ >
+ <p class="form-help-text">Este nombre será visible para los usuarios que completen el formulario.</p>
+ </div>
+
+ <div class="form-group">
+ <label>
+ Descripción
+ </label>
+ <textarea
+ id="formDescription"
+ name="formDescription"
+ rows="4"
+ placeholder="Describe el propósito del formulario (opcional)"
+ ></textarea>
+ <p class="form-help-text">Una descripción ayuda a los usuarios a entender el propósito del formulario.</p>
+ </div>
+
+ <div class="form-group">
+ <label>
+ Fecha de Apertura del Formulario <span>*</span>
+ </label>
+ <input
+ type="datetime-local"
+ id="formOpenAt"
+ name="formOpenAt"
+ required
+ >
+ <p class="form-help-text">El formulario será público desde esta fecha/hora.</p>
+ </div>
+
+ <div class="form-group">
+ <label>
+ Fecha del Evento <span>*</span>
+ </label>
+ <input
+ type="datetime-local"
+ id="formEventDate"
+ name="formEventDate"
+ required
+ >
+ <p class="form-help-text">Fecha/hora informativa del evento (por ejemplo, para correos).</p>
+ </div>
+
+ <div class="form-group">
+ <label>Conferencista</label>
+ <input type="text" id="formConferencista" name="formConferencista" maxlength="512" placeholder="Opcional" autocomplete="off">
+ <p class="form-help-text">Nombre del ponente o conferencista (opcional).</p>
+ </div>
+
+ <div class="form-group">
+ <label>Ubicación</label>
+ <input type="text" id="formUbicacion" name="formUbicacion" maxlength="512" placeholder="Opcional — lugar o dirección" autocomplete="off">
+ <p class="form-help-text">Lugar o dirección del evento (opcional).</p>
+ </div>
+
+ <div class="form-group">
+ <label>
+ Fecha de Expiración <span>*</span>
+ </label>
+ <input
+ type="datetime-local"
+ id="formExpiresAt"
+ name="formExpiresAt"
+ required
+ >
+ <p class="form-help-text">El formulario dejará de aceptar respuestas después de esta fecha.</p>
+ </div>
+
+ <div class="form-group">
+ <label style="display:flex;align-items:center;gap:0.5rem;">
+ <input type="checkbox" id="formUseInscriptionLimit" name="formUseInscriptionLimit" />
+ Limitar a X inscripciones
+ </label>
+ <input
+ type="number"
+ id="formInscriptionLimit"
+ name="formInscriptionLimit"
+ min="1"
+ placeholder="Ej: 50"
+ disabled
+ >
+ <p class="form-help-text">Activa la opción para establecer el límite. Si está desactivado, no hay tope.</p>
+ </div>
+
+ <div class="form-group">
+ <label>
+ Plantilla <span>*</span>
+ </label>
+ <select
+ id="formTemplate"
+ name="formTemplate"
+ required
+ >
+ <option value="">Selecciona una plantilla</option>
+ <option value="empty">Formulario Vacío</option>
+ <option value="default">Plantilla por Defecto</option>
+ </select>
+ <p class="form-help-text">
+ <strong>Formulario Vacío:</strong> Crea un formulario sin campos. Podrás agregar campos manualmente después.<br>
+ <strong>Plantilla por Defecto:</strong> Incluye campos comunes como Nombre, Apellido, Cédula, Email, Teléfono, etc.
+ </p>
+ </div>
+
+ <div class="form-actions">
+ <a href="../../" class="btn btn-secondary">
+ Cancelar
+ </a>
+ <button type="submit" class="btn btn-primary">
+ Crear Formulario
+ </button>
+ </div>
+ </form>
+ </div>
+ </div>
+
+ <footer class="main-footer">
+ © 2025 Proyecto Forms. Todos los derechos reservados.
+ </footer>
+ </main>
+ </div>
+
+ <!-- Bootstrap (carga todos los módulos) -->
+ <script type="module" src="../../../../utils/bootstrap.js"></script>
+ <!-- Nav Toggle Script -->
+ <script src="../../../shared/nav-toggle.js"></script>
+ <!-- Page scripts -->
+ <script type="module" src="index.js"></script>
+ <script>
+ // Establecer página actual para el layout
+ window.page = 'formularios';
+ </script>
+</body>
+</html>
+

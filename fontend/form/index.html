@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Forms</title>
+ <script src="https://cdn.tailwindcss.com"></script>
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+ <style>
+ @keyframes fadeIn {
+ from { 
+ opacity: 0; 
+ transform: translateY(2rem); 
+ }
+ to { 
+ opacity: 1; 
+ transform: translateY(0); 
+ }
+ }
+ .fade-in {
+ animation: fadeIn 0.5s ease-out;
+ }
+ .text-3xxl {
+ font-size: 2.25rem;
+ line-height: 2.5rem;
+ }
+ .social-toggle-container {
+ position: relative;
+ }
+
+ .social-toggle-label {
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ cursor: pointer;
+ }
+
+ .social-toggle-input {
+ display: none;
+ }
+
+ .social-toggle-slider {
+ width: 6rem;
+ height: 3rem;
+ background-color: #ccc;
+ border-radius: 3rem;
+ position: relative;
+ transition: background-color 0.3s;
+ cursor: pointer;
+ margin: 0 auto 1rem;
+ }
+
+ .social-toggle-input:checked + .social-toggle-slider {
+ background-color: #1e40af;
+ }
+
+ .social-toggle-knob {
+ width: 2.6rem;
+ height: 2.6rem;
+ background-color: white;
+ border-radius: 50%;
+ position: absolute;
+ top: 0.2rem;
+ left: 0.2rem;
+ transition: transform 0.3s;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ box-shadow: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.2);
+ }
+
+ .social-toggle-input:checked + .social-toggle-slider .social-toggle-knob {
+ transform: translateX(3rem);
+ }
+
+ .social-toggle-text {
+ display: block;
+ text-align: center;
+ font-size: 0.875rem;
+ color: #374151;
+ margin-top: 0.5rem;
+ }
+
+ .social-field {
+ margin-top: 1rem;
+ }
+
+ /* Header con opacidad */
+ .public-form-header-subtitle {
+ opacity: 0.8;
+ }
+
+ /* Grid para campos del formulario: móvil <600, tablet 600-1023, desktop >=1024 */
+ .form-fields-grid {
+ display: grid;
+ grid-template-columns: 1fr;
+ gap: 1.5rem;
+ }
+ .form-fields-grid:has(.social-toggle-label) {
+ grid-template-columns: repeat(2, 1fr);
+ }
+ @media (min-width: 600px) {
+ .form-fields-grid {
+ grid-template-columns: repeat(2, 1fr);
+ }
+ .form-fields-grid:has(.social-toggle-label) {
+ grid-template-columns: repeat(2, 1fr);
+ }
+ }
+ @media (min-width: 1024px) {
+ .form-fields-grid:has(.social-toggle-label) {
+ grid-template-columns: repeat(4, 1fr);
+ }
+ }
+ .form-fields-grid--consent {
+ grid-template-columns: 1fr !important;
+ }
+
+ /* Logo container: se adapta al tamaño de la imagen (ancho completo, altura según imagen) */
+ #logoContainer {
+ width: 100%;
+ max-width: 100vw;
+ overflow: hidden;
+ display: block;
+ line-height: 0;
+ }
+ #logoContainer img {
+ width: 100%;
+ height: auto;
+ max-height: 100vh;
+ object-fit: contain;
+ display: block;
+ vertical-align: middle;
+ }
+
+ /* Opciones del select: texto oscuro sobre fondo del menú para que siempre se vean */
+ #formContainer select option,
+ #registrationForm select option {
+ background-color: #ffffff;
+ color: #111827;
+ }
+
+ /* Modal de éxito */
+ #successModalBackdrop {
+ position: fixed;
+ inset: 0;
+ background-color: rgba(0, 0, 0, 0.5);
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ z-index: 9999;
+ opacity: 0;
+ visibility: hidden;
+ transition: opacity 0.2s ease, visibility 0.2s ease;
+ }
+ #successModalBackdrop.show {
+ opacity: 1;
+ visibility: visible;
+ }
+ #successModalBackdrop .success-modal-box {
+ background: white;
+ border-radius: 1rem;
+ padding: 2rem;
+ max-width: 28rem;
+ width: 90%;
+ box-sizing: border-box;
+ box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+ transform: scale(0.95);
+ transition: transform 0.2s ease;
+ }
+ @media (max-width: 767px) {
+ #successModalBackdrop .success-modal-box {
+ width: 90%;
+ max-width: 90vw;
+ }
+ }
+ #successModalBackdrop.show .success-modal-box {
+ transform: scale(1);
+ }
+ </style>
+</head>
+<body class="min-h-screen" id="formBody">
+ <!-- Header -->
+ <header class="bg-gradient-to-r from-blue-700 to-blue-900 shadow-lg">
+ <div class="container mx-auto px-4 py-6">
+ <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+ <div class="flex items-center space-x-3 order-2 md:order-1 justify-self-start">
+ <div class="w-12 h-12 rounded-lg flex items-center justify-center shadow-md" style="background-color: rgba(255,255,255,0.2);">
+ <i id="headerIcon" class="fas fa-clipboard-list text-xl"></i>
+ </div>
+ <div>
+ <h1 id="headerTitle" class="text-2xl font-bold text-white">Forms</h1>
+ <p id="headerSubtitle" class="text-sm public-form-header-subtitle">Sistema de Gestión de Formularios</p>
+ </div>
+ </div>
+ <div class="flex items-center order-1 md:order-2 justify-self-center md:justify-self-end">
+ <img src="../src/img/logo-white.png" alt="Logo" class="h-12 w-auto object-contain" id="headerLogo">
+ </div>
+ </div>
+ </div>
+ </header>
+
+ <!-- Loading State -->
+ <div id="loadingState" class="container mx-auto px-4 py-12 text-center">
+ <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700"></div>
+ <p class="mt-4">Cargando formulario...</p>
+ </div>
+
+ <!-- Error State -->
+ <div id="errorState" class="hidden container mx-auto px-4 py-12">
+ <div class="max-w-2xl mx-auto bg-red-50 border-l-4 border-red-500 rounded-lg p-6">
+ <div class="flex items-center">
+ <i class="fas fa-exclamation-circle text-red-500 text-2xl mr-3"></i>
+ <div>
+ <h3 class="text-lg font-semibold text-red-900">Error</h3>
+ <p id="errorMessage" class="text-red-700 mt-1"></p>
+ </div>
+ </div>
+ </div>
+ </div>
+
+ <!-- Form Container -->
+ <div id="formContainer" class="hidden">
+ <!-- Logo Image Container (fuera del contenedor limitado, ocupa 100% viewport) -->
+ <div id="logoContainer"></div>
+ <div id="formMetaStrip" class="w-full py-3 md:py-4">
+ <div class="container mx-auto px-4">
+ <div id="formMetaStripGrid" class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start">
+ <div id="formUbicacionMetaBlock" class="hidden rounded-xl px-1 py-1 md:pr-4">
+ <p class="form-meta-strip-heading text-xs uppercase tracking-wider opacity-80 mb-1.5">Ubicación</p>
+ <p id="formUbicacionValue" class="text-sm md:text-base leading-relaxed font-medium"></p>
+ </div>
+ <div id="formEventDateColumn" class="rounded-xl px-1 py-1 md:pl-4 text-left md:text-right md:justify-self-end w-full md:max-w-md md:ml-auto">
+ <p class="form-meta-strip-heading text-xs uppercase tracking-wider opacity-80 mb-1.5">Fecha del evento</p>
+ <p id="formEventDateValue" class="text-sm md:text-base font-semibold">Por confirmar</p>
+ </div>
+ </div>
+ </div>
+ </div>
+ 
+ <div class="container mx-auto px-4 py-8">
+ <div class="max-w-4xl mx-auto">
+ <div class="rounded-xl p-6 md:p-8 mb-6 md:mb-8 flex flex-col items-stretch" id="formHeader">
+ <h2 id="formTitle" class="text-3xxl font-bold text-center mb-1 md:mb-2 leading-tight"></h2>
+ <div id="formHeaderDetailsRow" class="mt-5 md:mt-6 w-full grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 md:items-start border-t border-gray-200/40 pt-6">
+ <div id="formDescriptionBlock" class="hidden text-center md:text-left">
+ <p class="text-xs uppercase tracking-wider opacity-70 mb-2">Descripción</p>
+ <p id="formDescription" class="text-sm md:text-base leading-relaxed"></p>
+ </div>
+ <div id="formConferencistaBlock" class="hidden text-center md:text-right">
+ <p class="text-xs uppercase tracking-wider opacity-70 mb-2">Conferencista</p>
+ <p id="formConferencistaValue" class="text-sm md:text-base font-semibold leading-snug"></p>
+ </div>
+ </div>
+ </div>
+
+ <!-- Formulario de inscripción -->
+ <form id="registrationForm" class="rounded-xl shadow-lg p-8 space-y-8">
+ <!-- Los campos se generarán dinámicamente aquí -->
+ <div id="formFieldsContainer"></div>
+
+ <!-- Submit Button -->
+ <div class="text-center pt-6 border-t border-gray-200">
+ <button 
+ type="submit" 
+ id="submitButton"
+ class="px-12 py-4 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center gap-3 mx-auto shadow-lg"
+ >
+ <i class="fas fa-paper-plane"></i>
+ <span class="submit-text">Enviar Inscripción</span>
+ </button>
+ </div>
+ </form>
+
+ <!-- Modal de éxito (se muestra al enviar correctamente, el formulario permanece visible) -->
+ <div id="successModalBackdrop" aria-hidden="true">
+ <div class="success-modal-box" role="dialog" aria-labelledby="successModalTitle" aria-modal="true">
+ <div class="flex items-center mb-4">
+ <div class="flex-shrink-0 w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+ <i class="fas fa-check-circle text-green-500 text-2xl"></i>
+ </div>
+ <div class="ml-4">
+ <h3 id="successModalTitle" class="text-lg font-semibold text-green-900">¡Formulario enviado exitosamente!</h3>
+ <p class="text-green-700 mt-0.5 text-sm">Tu información ha sido registrada correctamente.</p>
+ </div>
+ </div>
+ <div class="flex justify-end pt-2">
+ <button type="button" id="successModalClose" class="px-4 py-2 rounded-lg font-medium bg-green-600 text-white hover:bg-green-700 transition-colors">
+ Cerrar
+ </button>
+ </div>
+ </div>
+ </div>
+
+ <!-- Error al enviar formulario -->
+ <div id="formError" class="hidden mt-6 bg-red-50 border-l-4 border-red-500 rounded-lg p-6 shadow-lg">
+ <div class="flex items-start">
+ <i class="fas fa-exclamation-circle text-red-500 text-2xl mr-3 mt-1"></i>
+ <div class="flex-1">
+ <h3 class="text-lg font-semibold text-red-900 mb-2">⚠️ Error al enviar el formulario</h3>
+ <p id="errorMessageText" class="text-red-700 text-base font-medium"></p>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ <script>
+ // ================== CONSTANTES Y FUNCIONES GLOBALES ==================
+ // Estas se definirán después de cargar config.js
+ let API_BASE_URL = 'http://172.28.125.76:8080/api';
+ 
+ const $ = (sel, root = document) => root.querySelector(sel);
+
+ const FIELD_MAPPING = {
+ nombre: 'first_name',
+ apellido: 'last_name',
+ cedula: 'id_number',
+ genero: 'gender',
+ edad: 'age',
+ provincia: 'province',
+ email: 'email',
+ telefono: 'phone',
+ negocio: 'business_name',
+ registro_empresarial: 'business_registration',
+ instagram: 'instagram',
+ facebook: 'facebook',
+ tiktok: 'tiktok',
+ twitter: 'twitter',
+ compartirinfo: 'data_consent',
+ newsletter: 'newsletter'
+ };
+
+ const PLACEHOLDERS = {
+ nombre: 'Tu nombre',
+ apellido: 'Tu apellido',
+ cedula: 'Número de identificación',
+ telefono: 'Número de contacto',
+ negocio: 'Nombre de tu emprendimiento'
+ };
+ 
+ const SOCIAL_CONFIG = {
+ instagram: { ph: '@tu_usuario', icon: 'fab fa-instagram' },
+ facebook: { ph: 'facebook.com/tu_pagina', icon: 'fab fa-facebook-f' },
+ tiktok: { ph: '@tu_usuario', icon: 'fab fa-tiktok' },
+ twitter: { ph: '@tu_usuario', icon: 'fab fa-twitter' }
+ };
+ 
+ const RADIO_LABEL_MAP = { si: 'Sí', no: 'No', en_proceso: 'En proceso' };
+ 
+ const labelRequired = (field) =>
+ field.is_required ? '<span class="text-red-500">*</span>' : '';
+ 
+ const hexToRgb = (hex) => {
+ const res = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+ return res ? {
+ r: parseInt(res[1], 16),
+ g: parseInt(res[2], 16),
+ b: parseInt(res[3], 16)
+ } : null;
+ };
+ 
+ const getFormIdFromURL = () => {
+ const p = new URLSearchParams(window.location.search);
+ return p.get('id') || p.get('form_id');
+ };
+
+ const formatEventDate = (value) => {
+ if (!value) return 'Por confirmar';
+ const d = new Date(value);
+ if (Number.isNaN(d.getTime())) return String(value);
+ return d.toLocaleString('es-PA', {
+ year: 'numeric',
+ month: 'long',
+ day: '2-digit',
+ hour: '2-digit',
+ minute: '2-digit'
+ });
+ };
+ 
+ // ================== GESTOR DE ALTURA PARA IFRAME ==================
+ 
+ class HeightNotifier {
+ static notify() {
+ if (window.parent === window) return;
+ const h = Math.max(
+ document.body.scrollHeight,
+ document.documentElement.scrollHeight,
+ document.body.offsetHeight,
+ document.documentElement.offsetHeight,
+ document.documentElement.clientHeight
+ );
+ window.parent.postMessage({ type: 'form-embed-height', height: h }, '*');
+ }
+ }
+ 
+ // ================== CLIENTE API ==================
+ // Usar las funciones centralizadas de config.js
+ 
+ class ApiClient {
+ _checkFunctions() {
+ if (!window.getPublicForm || !window.getPublicFormSections || !window.getPublicFormCustomization || !window.getPublicFormLogo || !window.submitForm) {
+ throw new Error('Las funciones de API no están disponibles. Verifica que config.js se haya cargado correctamente.');
+ }
+ }
+ 
+ async getForm(formId) {
+ this._checkFunctions();
+ try {
+ console.log('[ApiClient] Obteniendo formulario:', formId);
+ const data = await window.getPublicForm(formId);
+ console.log('[ApiClient] Respuesta getForm completa:', data);
+ console.log('[ApiClient] Tipo de respuesta:', typeof data);
+ console.log('[ApiClient] Estructura de respuesta:', {
+ hasSuccess: 'success' in (data || {}),
+ hasForm: 'form' in (data || {}),
+ keys: data ? Object.keys(data) : 'data es null/undefined'
+ });
+ return { res: { ok: true, status: 200 }, data };
+ } catch (error) {
+ console.error('[ApiClient] Error en getForm:', error);
+ console.error('[ApiClient] Stack trace:', error.stack);
+ return { res: { ok: false, status: 500 }, data: { error: error.message } };
+ }
+ }
+ 
+ async getSections(formId) {
+ this._checkFunctions();
+ try {
+ console.log('[ApiClient] Obteniendo secciones:', formId);
+ const data = await window.getPublicFormSections(formId);
+ console.log('[ApiClient] Respuesta getSections:', data);
+ return { res: { ok: true, status: 200 }, data };
+ } catch (error) {
+ console.error('[ApiClient] Error en getSections:', error);
+ return { res: { ok: false, status: 500 }, data: { error: error.message } };
+ }
+ }
+ 
+ async getCustomization(formId) {
+ this._checkFunctions();
+ try {
+ console.log('[ApiClient] Obteniendo personalización:', formId);
+ const data = await window.getPublicFormCustomization(formId);
+ console.log('[ApiClient] Respuesta getCustomization:', data);
+ return { res: { ok: true, status: 200 }, data };
+ } catch (error) {
+ console.error('[ApiClient] Error en getCustomization:', error);
+ return { res: { ok: false, status: 500 }, data: { error: error.message } };
+ }
+ }
+
+ /** Logos de cabecera vía GET /public/forms/{id}/logo (async, endpoint dedicado). */
+ async getLogo(formId) {
+ this._checkFunctions();
+ try {
+ const data = await window.getPublicFormLogo(formId);
+ return { res: { ok: true, status: 200 }, data };
+ } catch (error) {
+ console.error('[ApiClient] Error en getLogo:', error);
+ return { res: { ok: false, status: 500 }, data: { error: error.message } };
+ }
+ }
+ 
+ async submitForm(payload) {
+ this._checkFunctions();
+ try {
+ console.log('[ApiClient] Enviando formulario:', payload);
+ const data = await window.submitForm(payload);
+ console.log('[ApiClient] Respuesta submitForm:', data);
+ return { res: { ok: true, status: 200 }, data };
+ } catch (error) {
+ console.error('[ApiClient] Error en submitForm:', error);
+ return { res: { ok: false, status: 500 }, data: { error: error.message } };
+ }
+ }
+ }
+
+ // ================== Imagen de cabecera (logo) — async, API dedicada ==================
+ class FormLogoLoader {
+ constructor(containerId = 'logoContainer') {
+ this.container = typeof containerId === 'string' ? document.getElementById(containerId) : containerId;
+ this._cache = null;
+ this.formId = null;
+ }
+
+ _resolveImageUrl(pathOrUrl) {
+ if (!pathOrUrl) return '';
+ const s = String(pathOrUrl).trim();
+ if (!s) return '';
+ if (s.startsWith('http')) return s;
+ const base = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : (window.API_CONFIG?.FORMS_API_BASE_URL || '');
+ return `${base}${s.startsWith('/') ? '' : '/'}${s}`;
+ }
+
+ _pickUrl() {
+ if (!this._cache) return null;
+ const isMobile = window.innerWidth < 768;
+ const { logo_url, logo_url_mobile } = this._cache;
+ if (isMobile && logo_url_mobile) return logo_url_mobile;
+ return logo_url || logo_url_mobile || null;
+ }
+
+ _render() {
+ const logoContainer = this.container;
+ if (!logoContainer) return;
+ const raw = this._pickUrl();
+ if (!raw) {
+ logoContainer.innerHTML = '';
+ return;
+ }
+ const url = this._resolveImageUrl(raw);
+ const img = document.createElement('img');
+ img.src = url;
+ img.alt = 'Logo';
+ img.className = 'logo-container-img';
+ img.onerror = function() {
+ console.error('[FormLogoLoader] Error cargando imagen:', this.src);
+ fetch(this.src, { method: 'HEAD' }).catch(() => {});
+ this.style.display = 'none';
+ };
+ logoContainer.innerHTML = '';
+ logoContainer.appendChild(img);
+ }
+
+ /**
+ * Carga URLs de logo desde GET /api/public/forms/{id}/logo y pinta la imagen.
+ * @param {string|number} formId
+ */
+ async load(formId) {
+ this.formId = formId;
+ if (!window.getPublicFormLogo) {
+ console.warn('[FormLogoLoader] getPublicFormLogo no está disponible');
+ return;
+ }
+ try {
+ const data = await window.getPublicFormLogo(formId);
+ const logo_url = data?.logo_url ?? '';
+ const logo_url_mobile = data?.logo_url_mobile ?? '';
+ this._cache = { logo_url, logo_url_mobile };
+ this._render();
+ } catch (e) {
+ console.error('[FormLogoLoader] Error cargando logos:', e);
+ this._cache = null;
+ if (this.container) this.container.innerHTML = '';
+ }
+ }
+
+ /** Sin nueva petición: alterna móvil/escritorio según ancho. */
+ refresh() {
+ this._render();
+ }
+
+ clear() {
+ this._cache = null;
+ if (this.container) this.container.innerHTML = '';
+ }
+ }
+ 
+ // ================== GESTOR DE PERSONALIZACIÓN ==================
+ 
+ class CustomizationManager {
+ apply(customization) {
+ const primaryColor = customization.primary_color || '#3B82F6';
+ const secondaryColor = customization.secondary_color || '#1E40AF';
+ const background = customization.background_color || '#FFFFFF';
+ const textColor = customization.text_color || '#1F2937';
+ const titleColor = customization.title_color || '#FFFFFF';
+ 
+ const formColor = customization.form_container_color || '#FFFFFF';
+ const descColor = customization.description_container_color || '#FFFFFF';
+ const formOpacity = customization.form_container_opacity != null &&
+ customization.form_container_opacity !== ''
+ ? parseFloat(customization.form_container_opacity) : 1;
+ const descOpacity = customization.description_container_opacity != null &&
+ customization.description_container_opacity !== ''
+ ? parseFloat(customization.description_container_opacity) : 1;
+ const metaTextColor = customization.form_meta_text_color || titleColor;
+ const metaBgStart = customization.form_meta_background_start || customization.form_meta_background || '';
+ const metaBgEnd = customization.form_meta_background_end || secondaryColor;
+ const metaBgOpacity = customization.form_meta_background_opacity != null &&
+ customization.form_meta_background_opacity !== ''
+ ? parseFloat(customization.form_meta_background_opacity) : 1;
+ 
+ const body = $('#formBody');
+ if (body) {
+ body.style.backgroundColor = background;
+ body.style.color = textColor;
+ }
+ 
+ const header = document.querySelector('header');
+ if (header) {
+ header.style.background = `linear-gradient(to right, ${primaryColor}, ${secondaryColor})`;
+ }
+ 
+ $('#headerIcon')?.style.setProperty('color', titleColor, 'important');
+ $('#headerTitle')?.style.setProperty('color', titleColor, 'important');
+ $('#headerSubtitle')?.style.setProperty('color', titleColor, 'important');
+ 
+ const formRgb = hexToRgb(formColor);
+ const descRgb = hexToRgb(descColor);
+ const formBg = formRgb
+ ? `rgba(${formRgb.r},${formRgb.g},${formRgb.b},${formOpacity})` : formColor;
+ const descBg = descRgb
+ ? `rgba(${descRgb.r},${descRgb.g},${descRgb.b},${descOpacity})` : descColor;
+ const metaStartRgb = hexToRgb(metaBgStart);
+ const metaEndRgb = hexToRgb(metaBgEnd);
+ const metaBg = (metaStartRgb && metaEndRgb)
+ ? `linear-gradient(to right, rgba(${metaStartRgb.r},${metaStartRgb.g},${metaStartRgb.b},${metaBgOpacity}), rgba(${metaEndRgb.r},${metaEndRgb.g},${metaEndRgb.b},${metaBgOpacity}))`
+ : `linear-gradient(to right, ${primaryColor}, ${secondaryColor})`;
+ 
+ let style = document.getElementById('form-customization-styles');
+ if (!style) {
+ style = document.createElement('style');
+ style.id = 'form-customization-styles';
+ document.head.appendChild(style);
+ }
+ 
+ style.textContent = `
+ body { background-color:${background} !important; color:${textColor} !important; }
+ #headerIcon,#headerTitle,#headerSubtitle { color:${titleColor} !important; }
+ #formMetaStrip { background:${metaBg} !important; }
+ #formHeader { background-color:${descBg} !important; }
+ #registrationForm { background-color:${formBg} !important; }
+ #formEventDateValue,#formUbicacionValue { color:${metaTextColor} !important; }
+ #formMetaStrip .form-meta-strip-heading { color:${metaTextColor} !important; opacity:0.88 !important; }
+ #formTitle,h2,h3 { color:${textColor} !important; }
+ p,label,.text-sm { color:${textColor} !important; }
+ #submitButton,button[type="submit"]{
+ background:linear-gradient(to right,${primaryColor},${secondaryColor}) !important;
+ color:#fff !important;border:none !important;
+ }
+ #submitButton:hover,button[type="submit"]:hover{
+ background:linear-gradient(to right,${primaryColor}dd,${secondaryColor}dd) !important;
+ }
+ input,select,textarea{background-color:transparent !important;color:${textColor} !important;}
+ input:focus,select:focus,textarea:focus{
+ border-color:${primaryColor} !important; -tw-ring-color:${primaryColor} !important;
+ }
+ .bg-white,.bg-gray-50,.bg-gray-100,.bg-gray-200{background-color:transparent !important;}
+ .text-gray-900,.text-gray-800,.text-gray-700,.text-gray-600,.text-gray-500{color:${textColor} !important;}
+ i.fas,i.fab,.fas,.fab{color:${textColor} !important;}
+ `;
+ /* La imagen de cabecera la gestiona FormLogoLoader + GET /public/forms/{id}/logo */
+ }
+ }
+ 
+ // ================== SISTEMA DE CAMPOS (OOP) ==================
+ 
+ const FIELD_BASE_CLASS = 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 transition-all duration-300';
+ const SOCIAL_FIELDS = ['instagram', 'facebook', 'tiktok', 'twitter'];
+ 
+ class Field {
+ constructor(field, category) {
+ this.field = field;
+ this.category = category;
+ this.name = field.field_name.toLowerCase();
+ this.type = field.field_type;
+ this.required = field.is_required;
+ }
+ 
+ get requiredAttr() {
+ return this.required ? 'required' : '';
+ }
+
+ get maxLengthAttr() {
+ const n = this.field.max_length;
+ return (n != null && n > 0) ? `maxlength="${n}"` : '';
+ }
+ 
+ label(extra = '') {
+ return `
+ <label for="${this.name}" class="block text-sm font-medium mb-2">
+ ${this.field.field_label} ${this.required ? '<span class="text-red-500">*</span>' : ''} ${extra}
+ </label>`;
+ }
+ 
+ wrapper(html, span = '') {
+ return `<div class="${span}">${html}</div>`;
+ }
+ 
+ textInput() {
+ const isAge = this.name === 'edad';
+ const extraAge = isAge
+ ? 'pattern="[0-9]{1,2}" maxlength="2" inputmode="numeric" title="Solo números de 1 o 2 dígitos" oninput="this.value=this.value.replace(/[^0-9]/g,\'\')"'
+ : '';
+ const extraLabel = [
+ this.name === 'negocio' ? '<span>(si no tiene, ingrese "Ninguno")</span>' : '',
+ isAge ? '<span>(solo números de 1 o 2 dígitos)</span>' : ''
+ ].join(' ');
+ const placeholder = PLACEHOLDERS[this.name] || '';
+ const extraClass = this.name === 'negocio' ? 'md:col-span-2' : '';
+ 
+ const maxLenAttr = this.name === 'edad' ? '' : this.maxLengthAttr;
+ return this.wrapper(
+ this.label(extraLabel) + `
+ <input type="text" id="${this.name}" name="${this.name}"
+ placeholder="${placeholder}"
+ ${this.requiredAttr} ${extraAge} ${maxLenAttr}
+ class="${FIELD_BASE_CLASS}">`,
+ extraClass
+ );
+ }
+ 
+ emailInput() {
+ return this.wrapper(
+ this.label() + `
+ <input type="email" id="${this.name}" name="${this.name}"
+ placeholder="tu@email.com" ${this.requiredAttr} ${this.maxLengthAttr}
+ class="${FIELD_BASE_CLASS}">`
+ );
+ }
+ 
+ telInput() {
+ return this.wrapper(
+ this.label() + `
+ <input type="tel" id="${this.name}" name="${this.name}"
+ placeholder="Número de contacto" ${this.requiredAttr} ${this.maxLengthAttr}
+ class="${FIELD_BASE_CLASS}">`
+ );
+ }
+ 
+ dateInput() {
+ return this.wrapper(
+ this.label() + `
+ <input type="date" id="${this.name}" name="${this.name}" ${this.requiredAttr}
+ class="${FIELD_BASE_CLASS}">`
+ );
+ }
+ 
+ numberInput() {
+ return this.wrapper(
+ this.label() + `
+ <input type="number" id="${this.name}" name="${this.name}" ${this.requiredAttr}
+ class="${FIELD_BASE_CLASS}">`
+ );
+ }
+ 
+ select() {
+ const opts = (this.field.field_options || '')
+ .split(',').map(o => o.trim()).filter(Boolean);
+ return this.wrapper(
+ this.label() + `
+ <select id="${this.name}" name="${this.name}" ${this.requiredAttr}
+ class="${FIELD_BASE_CLASS}">
+ <option value="">Seleccione...</option>
+ ${opts.map(o => `<option value="${o}">${o}</option>`).join('')}
+ </select>`
+ );
+ }
+ 
+ radio() {
+ const opts = (this.field.field_options || '')
+ .split(',').map(o => o.trim()).filter(Boolean);
+ return this.wrapper(
+ `
+ <label class="block text-sm font-medium mb-4">
+ ${this.field.field_label} ${this.required ? '<span class="text-red-500">*</span>' : ''}
+ </label>
+ <div class="flex flex-col sm:flex-row gap-12">
+ ${opts.map(v => `
+ <label class="flex items-center cursor-pointer">
+ <input type="radio" name="${this.name}" value="${v}" ${this.requiredAttr}
+ class="w-4 h-4 border-gray-300 focus:ring-2">
+ <span class="ml-2 text-sm font-medium">
+ ${RADIO_LABEL_MAP[v] || v.replace('_', ' ').replace(/^./, c => c.toUpperCase())}
+ </span>
+ </label>
+ `).join('')}
+ </div>`,
+ 'md:col-span-2'
+ );
+ }
+ 
+ checkbox() {
+ const isInfo = this.name === 'compartirinfo';
+ const desc = isInfo
+ ? 'Autorizo a utilizar la información proporcionada para fines del evento y comunicación relacionada.'
+ : 'Recibiré notificaciones sobre próximos programas de capacitación y eventos.';
+ return this.wrapper(
+ `
+ <div class="flex items-start">
+ <input type="checkbox" id="${this.name}" name="${this.name}"
+ ${this.requiredAttr} ${isInfo ? 'checked' : ''}
+ class="mt-1 w-4 h-4 border-gray-300 rounded focus:ring-2">
+ <label for="${this.name}" class="ml-3 text-sm">
+ <span class="font-medium">${this.field.field_label}</span><br>
+ <span>${desc}</span>
+ </label>
+ </div>`,
+ 'md:col-span-2'
+ );
+ }
+ 
+ textarea() {
+ return this.wrapper(
+ this.label() + `
+ <textarea id="${this.name}" name="${this.name}" rows="4" ${this.requiredAttr} ${this.maxLengthAttr}
+ class="${FIELD_BASE_CLASS}"></textarea>`,
+ 'md:col-span-2'
+ );
+ }
+ 
+ social() {
+ const cfg = SOCIAL_CONFIG[this.name];
+ return this.wrapper(
+ `
+ <label class="social-toggle-label">
+ <input type="checkbox" id="${this.name}_toggle" name="${this.name}_toggle"
+ class="social-toggle-input"
+ onchange="toggleSocialField('${this.name}')">
+ <div class="social-toggle-slider">
+ <div class="social-toggle-knob">
+ <i class="${cfg.icon}"></i>
+ </div>
+ </div>
+ <span class="social-toggle-text">${this.field.field_label}</span>
+ </label>
+ <div id="${this.name}_field" class="social-field hidden mt-3">
+ <input type="text" name="${this.name}" placeholder="${cfg.ph}"
+ class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 transition-all duration-300">
+ </div>`
+ );
+ }
+ 
+ render() {
+ // Campos sociales primero
+ if (SOCIAL_FIELDS.includes(this.name)) return this.social();
+ 
+ // Por tipo de campo
+ if (this.type === 'select') return this.select();
+ if (this.type === 'radio') return this.radio();
+ if (this.type === 'checkbox') return this.checkbox();
+ if (this.type === 'textarea') return this.textarea();
+ if (this.type === 'date') return this.dateInput();
+ if (this.type === 'number') return this.numberInput();
+ if (this.type === 'email') return this.emailInput();
+ if (this.type === 'tel') return this.telInput();
+ 
+ // TextField con validaciones especiales (edad, negocio)
+ return this.textInput();
+ }
+ }
+ 
+ // Factory
+ class FieldFactory {
+ static create(field, category) {
+ const name = field.field_name.toLowerCase();
+ 
+ // Normalización de tipos especiales
+ if (name === 'telefono' && field.field_type === 'text') field.field_type = 'tel';
+ if (name === 'registro_empresarial' && field.field_type === 'select') field.field_type = 'radio';
+ 
+ return new Field(field, category);
+ }
+ }
+ 
+ // ================== RENDERIZADOR DEL FORMULARIO ==================
+ 
+ class FormRenderer {
+ constructor(form, sections, container) {
+ this.form = form;
+ this.sections = sections || [];
+ this.container = container;
+ }
+ 
+ groupFieldsBySection() {
+ // Crear un mapa de secciones por ID
+ const sectionsMap = {};
+ this.sections.forEach(section => {
+ sectionsMap[section.id] = {
+ id: section.id,
+ title: section.section_title,
+ icon: section.section_icon,
+ display_order: section.display_order,
+ fields: []
+ };
+ });
+ 
+ // Agrupar campos por section_id
+ const fieldsWithoutSection = [];
+ this.form.fields.forEach(field => {
+ const sectionId = field.section_id;
+ if (sectionId && sectionsMap[sectionId]) {
+ sectionsMap[sectionId].fields.push(field);
+ } else {
+ fieldsWithoutSection.push(field);
+ }
+ });
+ 
+ // Ordenar secciones por display_order
+ const sortedSections = this.sections
+ .map(s => sectionsMap[s.id])
+ .filter(s => s && s.fields.length > 0)
+ .sort((a, b) => a.display_order - b.display_order);
+ 
+ return {
+ sections: sortedSections,
+ fieldsWithoutSection: fieldsWithoutSection
+ };
+ }
+ 
+ createSection(section, fields) {
+ if (!fields || fields.length === 0) return '';
+ 
+ const isConsent = (section.title || '').toLowerCase().includes('consentimiento');
+ const fieldsHtml = fields
+ .map(f => {
+ // Determinar categoría para campos sociales
+ const name = f.field_name.toLowerCase();
+ const isSocial = ['instagram','facebook','tiktok','twitter'].includes(name);
+ return FieldFactory.create(f, isSocial ? 'social' : 'other').render();
+ })
+ .join('');
+ 
+ return `
+ <div class="space-y-6">
+ <h3 class="text-2xl font-semibold mt-8 md:mt-10 mb-6 flex items-center">
+ <i class="fas ${section.icon} mr-3"></i>${section.title}
+ </h3>
+ <div class="form-fields-grid${isConsent ? ' form-fields-grid--consent' : ''}">
+ ${fieldsHtml}
+ </div>
+ </div>
+ `;
+ }
+ 
+ createFieldsWithoutSection(fields) {
+ if (!fields || fields.length === 0) return '';
+ 
+ const fieldsHtml = fields
+ .map(f => {
+ const name = f.field_name.toLowerCase();
+ const isSocial = ['instagram','facebook','tiktok','twitter'].includes(name);
+ return FieldFactory.create(f, isSocial ? 'social' : 'other').render();
+ })
+ .join('');
+ 
+ return `
+ <div class="space-y-6">
+ <div class="form-fields-grid">
+ ${fieldsHtml}
+ </div>
+ </div>
+ `;
+ }
+ 
+ render() {
+ $('#formTitle').textContent = this.form.form_name;
+ const descRaw = this.form.description != null ? String(this.form.description).trim() : '';
+ $('#formDescription').textContent = descRaw;
+ $('#formEventDateValue').textContent = formatEventDate(this.form.event_date);
+
+ const conf = this.form.conferencista != null && String(this.form.conferencista).trim() !== ''
+ ? String(this.form.conferencista).trim() : '';
+ const ubi = this.form.ubicacion != null && String(this.form.ubicacion).trim() !== ''
+ ? String(this.form.ubicacion).trim() : '';
+
+ const descBlock = document.getElementById('formDescriptionBlock');
+ const detailsRow = document.getElementById('formHeaderDetailsRow');
+ if (descBlock) {
+ descBlock.classList.toggle('hidden', descRaw === '');
+ }
+
+ const confBlock = document.getElementById('formConferencistaBlock');
+ const confVal = document.getElementById('formConferencistaValue');
+ if (confBlock && confVal) {
+ if (conf) {
+ confVal.textContent = conf;
+ confBlock.classList.remove('hidden');
+ } else {
+ confVal.textContent = '';
+ confBlock.classList.add('hidden');
+ }
+ }
+
+ if (descBlock && confBlock) {
+ const hasDesc = descRaw !== '';
+ const hasConf = !!conf;
+ descBlock.classList.remove('md:col-span-2', 'text-center');
+ confBlock.classList.remove('md:col-span-2');
+ descBlock.classList.add('md:text-left', 'text-center');
+ confBlock.classList.add('md:text-right');
+ if (hasDesc && !hasConf) {
+ descBlock.classList.add('md:col-span-2', 'text-center');
+ descBlock.classList.remove('md:text-left');
+ } else if (!hasDesc && hasConf) {
+ confBlock.classList.add('md:col-span-2', 'text-center');
+ confBlock.classList.remove('md:text-right');
+ }
+ }
+
+ const hasDetails = descRaw !== '' || !!conf;
+ if (detailsRow) {
+ detailsRow.classList.toggle('hidden', !hasDetails);
+ }
+
+ const ubiMeta = document.getElementById('formUbicacionMetaBlock');
+ const ubiVal = document.getElementById('formUbicacionValue');
+ const metaGrid = document.getElementById('formMetaStripGrid');
+ const dateCol = document.getElementById('formEventDateColumn');
+ if (ubiMeta && ubiVal) {
+ if (ubi) {
+ ubiVal.textContent = ubi;
+ ubiMeta.classList.remove('hidden');
+ } else {
+ ubiVal.textContent = '';
+ ubiMeta.classList.add('hidden');
+ }
+ }
+ if (metaGrid && dateCol) {
+ if (ubi) {
+ metaGrid.className = 'max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start';
+ dateCol.className = 'rounded-xl px-1 py-1 md:pl-4 text-left md:text-right md:justify-self-end w-full md:max-w-md md:ml-auto';
+ } else {
+ metaGrid.className = 'max-w-4xl mx-auto grid grid-cols-1 gap-4 items-center text-center';
+ dateCol.className = 'rounded-xl px-1 py-1 text-center mx-auto w-full max-w-lg';
+ }
+ }
+
+ if (!this.form.fields || !this.form.fields.length) {
+ this.container.innerHTML =
+ '<p class="text-center py-8">Este formulario no tiene campos configurados.</p>';
+ setTimeout(() => HeightNotifier.notify(), 200);
+ return;
+ }
+
+ const grouped = this.groupFieldsBySection();
+ let html = '';
+
+ grouped.sections.forEach(section => {
+ html += this.createSection(section, section.fields);
+ });
+
+ if (grouped.fieldsWithoutSection.length > 0) {
+ html += this.createFieldsWithoutSection(grouped.fieldsWithoutSection);
+ }
+
+ this.container.innerHTML = html;
+
+ setTimeout(() => HeightNotifier.notify(), 200);
+ }
+ }
+ 
+ // ================== APP PRINCIPAL ==================
+ 
+ class FormApp {
+ constructor() {
+ this.api = new ApiClient();
+ this.customizer = new CustomizationManager();
+ this.logoLoader = new FormLogoLoader('logoContainer');
+ this.currentForm = null;
+ this.formId = null;
+ 
+ // DOM
+ this.loadingState = $('#loadingState');
+ this.errorState = $('#errorState');
+ this.errorMessage = $('#errorMessage'); // error global
+ this.formContainer = $('#formContainer');
+ this.fieldsContainer = $('#formFieldsContainer');
+ this.formElement = $('#registrationForm');
+ this.successModal = $('#successModalBackdrop');
+ this.successModalClose = $('#successModalClose');
+ this.formErrorBox = $('#formError'); // error envío
+ this.formErrorText = $('#errorMessageText');
+ }
+ 
+ init() {
+ this.formId = getFormIdFromURL();
+ if (!this.formId) {
+ this.showError('No se especificó un ID de formulario en la URL');
+ return;
+ }
+ 
+ this.loadForm();
+ this.bindEvents();
+ }
+ 
+ bindEvents() {
+ if (this.formElement) {
+ this.formElement.addEventListener('submit', (e) => this.handleSubmit(e));
+ }
+ if (this.successModalClose) {
+ this.successModalClose.addEventListener('click', () => this.closeSuccessModal());
+ }
+ if (this.successModal) {
+ this.successModal.addEventListener('click', (e) => {
+ if (e.target === this.successModal) this.closeSuccessModal();
+ });
+ }
+ window.addEventListener('resize', () => {
+ HeightNotifier.notify();
+ if (this.currentForm && this.logoLoader) {
+ this.logoLoader.refresh();
+ }
+ });
+ setTimeout(() => HeightNotifier.notify(), 500);
+ setInterval(() => HeightNotifier.notify(), 1000);
+ }
+ 
+ async loadForm() {
+ try {
+ console.log('[FormApp] Iniciando carga de formulario, ID:', this.formId);
+ const { res, data } = await this.api.getForm(this.formId);
+ console.log('[FormApp] Respuesta recibida:', { res, data });
+ 
+ // Verificar si hay error en la respuesta
+ if (!res.ok) {
+ const errorMsg = data?.error || data?.message || 'Error al obtener el formulario';
+ console.error('[FormApp] Error en respuesta:', errorMsg);
+ throw new Error(errorMsg);
+ }
+ 
+ // La respuesta puede venir en diferentes formatos
+ // Formato esperado: { success: true, form: {...} }
+ // O directamente: { form: {...} }
+ if (data && (data.success === false || (data.success !== true && !data.form))) {
+ const errorMsg = data.message || data.error || 'Formulario no encontrado';
+ console.error('[FormApp] Formulario no encontrado o error:', errorMsg);
+ throw new Error(errorMsg);
+ }
+ 
+ // Extraer el formulario de la respuesta
+ const form = data.form || data;
+ if (!form || (typeof form === 'object' && !form.id && !form.form_name)) {
+ console.error('[FormApp] Formulario inválido en respuesta:', form);
+ throw new Error('El formulario recibido no tiene un formato válido');
+ }
+ 
+ console.log('[FormApp] Formulario cargado correctamente:', form);
+ 
+ this.currentForm = form;
+ 
+ // Obtener secciones del formulario
+ let sections = [];
+ try {
+ const { res: sRes, data: sData } = await this.api.getSections(this.formId);
+ console.log('[FormApp] Respuesta de secciones:', { sRes, sData });
+ if (sRes.ok) {
+ // La respuesta puede venir como { success: true, sections: [...] } o directamente { sections: [...] }
+ sections = sData?.sections || sData || [];
+ if (!Array.isArray(sections)) {
+ console.warn('[FormApp] Secciones no es un array:', sections);
+ sections = [];
+ }
+ }
+ } catch (err) {
+ console.error('[FormApp] Error obteniendo secciones:', err);
+ sections = [];
+ }
+ // Table-per-form: derivar secciones/campos desde form.schema (IDs sintéticos 1..n que el backend)
+ let schemaParsed = null;
+ if (form.schema) {
+ try {
+ schemaParsed = typeof form.schema === 'string' ? JSON.parse(form.schema) : form.schema;
+ } catch (e) {
+ console.warn('[FormApp] No se pudo parsear form.schema:', e);
+ }
+ }
+ // Derivar secciones y campos SOLO desde form.schema (sin retrocompatibilidad de claves)
+ if (schemaParsed) {
+ const secs = schemaParsed.sections;
+ if (Array.isArray(secs)) {
+ sections = secs.map((s, i) => ({
+ id: i + 1,
+ section_title: s.section_title != null ? s.section_title : 'Sección',
+ section_icon: s.section_icon != null ? s.section_icon : 'fa-folder',
+ display_order: s.display_order != null ? s.display_order : i
+ }));
+ console.log('[FormApp] Secciones derivadas de form.schema:', sections.length);
+ }
+
+ const sectionIdToNum = {};
+ if (Array.isArray(secs)) {
+ secs.forEach((s, i) => { sectionIdToNum[s.id] = i + 1; });
+ }
+
+ const rawFields = schemaParsed.fields;
+ if (Array.isArray(rawFields)) {
+ form.fields = rawFields.map((f, i) => ({
+ id: i + 1,
+ form_id: form.id,
+ field_label: f.field_label != null ? f.field_label : '',
+ field_name: f.field_name != null ? f.field_name : '',
+ field_type: f.field_type != null ? f.field_type : 'text',
+ field_options: f.field_options != null ? String(f.field_options) : '',
+ is_required: !!f.is_required,
+ max_length: f.max_length != null ? f.max_length : null,
+ display_order: f.display_order != null ? f.display_order : i,
+ section_id: f.section_id != null ? (sectionIdToNum[f.section_id] ?? null) : null
+ }));
+ this.currentForm = form;
+ console.log('[FormApp] Campos derivados de form.schema:', form.fields.length);
+ }
+ }
+ 
+ this.loadingState.classList.add('hidden');
+ this.formContainer.classList.remove('hidden');
+ 
+ const renderer = new FormRenderer(this.currentForm, sections, this.fieldsContainer);
+ renderer.render();
+ 
+ // Personalización de colores + imagen de cabecera en paralelo (logo: GET /public/forms/{id}/logo)
+ try {
+ await Promise.all([
+ (async () => {
+ const { res: cRes, data: cData } = await this.api.getCustomization(this.formId);
+ console.log('[FormApp] Respuesta de personalización:', { cRes, cData });
+ if (cRes.ok) {
+ const customization = cData?.customization || cData;
+ if (customization && typeof customization === 'object') {
+ setTimeout(() => this.customizer.apply(customization), 50);
+ }
+ }
+ })(),
+ this.logoLoader.load(this.formId)
+ ]);
+ } catch (err) {
+ console.error('[FormApp] Error cargando personalización o logo:', err);
+ }
+ } catch (err) {
+ console.error(err);
+ this.showError(err.message || 'Error al cargar el formulario');
+ }
+ }
+ 
+ showError(msg) {
+ this.loadingState.classList.add('hidden');
+ this.errorState.classList.remove('hidden');
+ if (this.errorMessage) this.errorMessage.textContent = msg;
+ }
+ 
+ showFormError(msg) {
+ if (!this.formErrorBox || !this.formErrorText) {
+ alert('⚠️ Error: ' + msg);
+ return;
+ }
+ this.formErrorText.textContent = msg;
+ this.formErrorBox.classList.remove('hidden');
+ setTimeout(() => {
+ this.formErrorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+ HeightNotifier.notify();
+ }, 100);
+ }
+
+ showSuccessModal() {
+ if (!this.successModal) return;
+ this.successModal.classList.add('show');
+ this.successModal.setAttribute('aria-hidden', 'false');
+ }
+
+ closeSuccessModal() {
+ if (!this.successModal) return;
+ this.successModal.classList.remove('show');
+ this.successModal.setAttribute('aria-hidden', 'true');
+ setTimeout(() => HeightNotifier.notify(), 200);
+ }
+
+ buildPayload(formData) {
+ const payload = { form_id: parseInt(this.formId), answers: [] };
+ 
+ this.currentForm.fields.forEach(field => {
+ const name = field.field_name;
+ const type = field.field_type;
+ let value = '';
+ 
+ if (SOCIAL_CONFIG[name]) {
+ if (!formData.has(`${name}_toggle`)) return;
+ value = formData.get(name) || '';
+ } else if (type === 'checkbox') {
+ value = formData.has(name) ? 'true' : 'false';
+ } else {
+ value = formData.get(name) || '';
+ }
+ 
+ const backendName = FIELD_MAPPING[name];
+ if (backendName) {
+ if (backendName === 'data_consent' || backendName === 'newsletter') {
+ payload[backendName] = value === 'true' || formData.has(name);
+ } else if (backendName === 'age') {
+ const n = parseInt(value);
+ payload[backendName] = isNaN(n) || n <= 0 ? 0 : n;
+ } else {
+ payload[backendName] = value;
+ }
+ } else {
+ payload.answers.push({ field_id: field.id, field_value: value });
+ }
+ });
+ 
+ return payload;
+ }
+ 
+ async handleSubmit(e) {
+ e.preventDefault();
+ 
+ const submitBtn = this.formElement.querySelector('button[type="submit"]');
+ const submitText = submitBtn.querySelector('.submit-text');
+ const original = submitText.innerHTML;
+ 
+ submitBtn.disabled = true;
+ submitText.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Enviando...';
+ 
+ try {
+ const formData = new FormData(this.formElement);
+ const payload = this.buildPayload(formData);
+ 
+ const { res, data } = await this.api.submitForm(payload);
+ 
+ if (!res.ok) {
+ submitBtn.disabled = false;
+ submitText.innerHTML = original;
+ 
+ const msg = data.message || data.error || 'Error al enviar el formulario';
+ if (res.status === 409) {
+ this.closeSuccessModal();
+ this.showFormError(msg);
+ setTimeout(() => {
+ alert('⚠️ ADVERTENCIA\n\n' + msg + '\n\nPor favor, verifica los datos e intenta con otra persona.');
+ }, 300);
+ return;
+ }
+ this.showFormError(msg);
+ return;
+ }
+ 
+ if (data.success) {
+ this.formErrorBox?.classList.add('hidden');
+ this.showSuccessModal();
+ submitBtn.disabled = false;
+ submitText.innerHTML = original;
+ setTimeout(() => HeightNotifier.notify(), 200);
+ } else {
+ this.showFormError(data.message || data.error || 'Error al enviar el formulario');
+ }
+ } catch (err) {
+ console.error('[FormApp] handleSubmit error:', err);
+ this.showFormError(err && err.message ? err.message : 'Error al enviar el formulario');
+ submitBtn.disabled = false;
+ submitText.innerHTML = original;
+ }
+ }
+ }
+ 
+ // ================== TOGGLE GLOBAL PARA CAMPOS SOCIALES ==================
+ 
+ // Lo dejamos global para poder llamarlo desde el HTML generado
+ window.toggleSocialField = function (name) {
+ const toggle = document.getElementById(`${name}_toggle`);
+ const field = document.getElementById(`${name}_field`);
+ if (!toggle || !field) return;
+ const input = field.querySelector('input');
+ if (toggle.checked) {
+ field.classList.remove('hidden');
+ input.disabled = false;
+ } else {
+ field.classList.add('hidden');
+ input.disabled = true;
+ input.value = '';
+ }
+ setTimeout(() => HeightNotifier.notify(), 150);
+ };
+ 
+ // ================== FUNCIÓN DE INICIALIZACIÓN ==================
+ 
+ function initPublicForm() {
+ // Actualizar API_BASE_URL con el valor de window.API_CONFIG
+ API_BASE_URL = window.API_CONFIG?.FORMS_API_BASE_URL || (window.location.origin + '/api');
+ 
+ // Verificar que las funciones de API estén disponibles
+ if (!window.getPublicForm || !window.getPublicFormSections || !window.getPublicFormCustomization || !window.getPublicFormLogo || !window.submitForm) {
+ console.error('[FormApp] Funciones de API no disponibles');
+ const errorState = document.getElementById('errorState');
+ const errorMessage = document.getElementById('errorMessage');
+ if (errorState && errorMessage) {
+ document.getElementById('loadingState')?.classList.add('hidden');
+ errorState.classList.remove('hidden');
+ errorMessage.textContent = 'Error: Las funciones de API no están disponibles. Por favor, recarga la página.';
+ }
+ return;
+ }
+ console.log('[FormApp] Inicializando aplicación...');
+ const app = new FormApp();
+ app.init();
+ }
+ 
+ // ================== IMPORTAR CONFIG.JS ==================
+ // Importar config.js antes de inicializar (igual que form-list.html)
+ import('../services/config.js').then(() => {
+ // Esperar un momento para asegurar que las exportaciones a window se completen
+ setTimeout(() => {
+ // Verificar que las funciones estén disponibles
+ if (typeof window.getPublicForm === 'undefined' || 
+ typeof window.getPublicFormSections === 'undefined' ||
+ typeof window.getPublicFormCustomization === 'undefined' ||
+ typeof window.getPublicFormLogo === 'undefined' ||
+ typeof window.submitForm === 'undefined') {
+ console.error('[public-form] Funciones de API no disponibles en window');
+ console.log('window.getPublicForm:', window.getPublicForm);
+ console.log('window.getPublicFormSections:', window.getPublicFormSections);
+ console.log('window.getPublicFormCustomization:', window.getPublicFormCustomization);
+ console.log('window.getPublicFormLogo:', window.getPublicFormLogo);
+ console.log('window.submitForm:', window.submitForm);
+ console.log('window.API_CONFIG:', window.API_CONFIG);
+ const errorState = document.getElementById('errorState');
+ const errorMessage = document.getElementById('errorMessage');
+ if (errorState && errorMessage) {
+ document.getElementById('loadingState')?.classList.add('hidden');
+ errorState.classList.remove('hidden');
+ errorMessage.textContent = 'Error al cargar las funciones de API. Por favor, recarga la página.';
+ }
+ return;
+ }
+ 
+ console.log('[public-form] Funciones de API disponibles:', {
+ getPublicForm: !!window.getPublicForm,
+ getPublicFormSections: !!window.getPublicFormSections,
+ getPublicFormCustomization: !!window.getPublicFormCustomization,
+ getPublicFormLogo: !!window.getPublicFormLogo,
+ submitForm: !!window.submitForm,
+ API_CONFIG: !!window.API_CONFIG,
+ FORMS_API_BASE_URL: window.API_CONFIG?.FORMS_API_BASE_URL
+ });
+ 
+ // Inicializar cuando el DOM esté listo
+ if (document.readyState === 'loading') {
+ document.addEventListener('DOMContentLoaded', () => {
+ initPublicForm();
+ });
+ } else {
+ initPublicForm();
+ }
+ }, 100);
+ }).catch(error => {
+ console.error('[public-form] Error al importar config.js:', error);
+ const errorState = document.getElementById('errorState');
+ const errorMessage = document.getElementById('errorMessage');
+ if (errorState && errorMessage) {
+ document.getElementById('loadingState')?.classList.add('hidden');
+ errorState.classList.remove('hidden');
+ errorMessage.textContent = 'Error al cargar la configuración: ' + error.message;
+ }
+ });
+ </script>
+
+</body>
+</html>

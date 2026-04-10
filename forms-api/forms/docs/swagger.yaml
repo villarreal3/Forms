@@ -1,0 +1,580 @@
+swagger: "2.0"
+info:
+  title: Forms API
+  description: |
+    Microservicio REST para formularios dinámicos, inscripciones y administración.
+    Rutas bajo `/api`. Las rutas `/api/admin/*` requieren header `Authorization: Bearer <JWT>` emitido por users-api.
+  version: "1.0.0"
+
+host: localhost:8080
+basePath: /api
+schemes:
+  - http
+  - https
+
+consumes:
+  - application/json
+produces:
+  - application/json
+
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+    description: "JWT del login en users-api. Formato: Bearer <token>"
+
+definitions:
+  ErrorResponse:
+    type: object
+    properties:
+      success:
+        type: boolean
+      message:
+        type: string
+      error:
+        type: string
+  GenericObject:
+    type: object
+
+paths:
+  /health:
+    get:
+      tags: [Público]
+      summary: Estado del servicio
+      operationId: healthCheck
+      responses:
+        "200":
+          description: OK
+
+  /public/forms:
+    get:
+      tags: [Público]
+      summary: Listar formularios activos (no vencidos, no cerrados)
+      operationId: getPublicForms
+      responses:
+        "200":
+          description: Lista de formularios
+          schema:
+            type: object
+
+  /public/forms/{id}:
+    get:
+      tags: [Público]
+      summary: Obtener formulario público por ID
+      operationId: getPublicForm
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Formulario con schema
+        "404":
+          description: No encontrado o no disponible
+
+  /public/forms/{id}/sections:
+    get:
+      tags: [Público]
+      summary: Secciones del formulario
+      operationId: getPublicFormSections
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Secciones
+
+  /public/forms/{id}/customization:
+    get:
+      tags: [Público]
+      summary: Personalización visual del formulario
+      operationId: getPublicFormCustomization
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Colores, logos, etc.
+
+  /public/forms/{id}/logo:
+    get:
+      tags: [Público]
+      summary: URLs de logo (escritorio y móvil) del formulario público
+      operationId: getPublicFormLogo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: logo_url y logo_url_mobile (rutas relativas al API o vacías)
+
+  /images/{form_id}/{filename}:
+    get:
+      tags: [Público]
+      summary: Servir imagen de formulario
+      operationId: serveFormImage
+      produces:
+        - image/*
+        - application/octet-stream
+      parameters:
+        - name: form_id
+          in: path
+          required: true
+          type: integer
+        - name: filename
+          in: path
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Archivo de imagen
+        "404":
+          description: No encontrada
+
+  /forms/submit:
+    post:
+      tags: [Público]
+      summary: Enviar inscripción a un formulario
+      operationId: submitForm
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+      responses:
+        "200":
+          description: Resultado del envío
+        "400":
+          description: Error de validación
+
+  /forms/auto-submit:
+    post:
+      tags: [Público]
+      summary: Auto-inscripción desde otro formulario con el mismo schema (misma cédula)
+      operationId: autoSubmitFromPrevious
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              form_id:
+                type: integer
+              id_number:
+                type: string
+      responses:
+        "200":
+          description: success, found
+
+  /users/get:
+    post:
+      tags: [Público]
+      summary: Buscar usuario por cédula y email
+      operationId: getUserByCredentials
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              id_number:
+                type: string
+              email:
+                type: string
+      responses:
+        "200":
+          description: Usuario
+        "404":
+          description: No encontrado
+
+  /admin/forms:
+    get:
+      security:
+        - Bearer: []
+      tags: [Admin - Formularios]
+      summary: Listar todos los formularios
+      operationId: adminGetForms
+      responses:
+        "200":
+          description: Lista
+        "401":
+          description: No autorizado
+    post:
+      security:
+        - Bearer: []
+      tags: [Admin - Formularios]
+      summary: Crear formulario
+      operationId: adminCreateForm
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+      responses:
+        "201":
+          description: Creado
+        "401":
+          description: No autorizado
+
+  /admin/forms/{id}:
+    get:
+      security:
+        - Bearer: []
+      tags: [Admin - Formularios]
+      summary: Obtener formulario por ID
+      operationId: adminGetForm
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Formulario
+        "404":
+          description: No encontrado
+    patch:
+      security:
+        - Bearer: []
+      tags: [Admin - Formularios]
+      summary: Actualizar conferencista y/o ubicación
+      operationId: adminPatchFormMetadata
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+          format: int64
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              conferencista:
+                type: string
+              ubicacion:
+                type: string
+      responses:
+        "200":
+          description: Actualizado
+        "400":
+          description: Sin campos en el cuerpo
+        "404":
+          description: No encontrado
+
+  /admin/forms/{id}/schema:
+    put:
+      security:
+        - Bearer: []
+      tags: [Admin - Formularios]
+      summary: Actualizar schema JSON del formulario
+      operationId: adminUpdateFormSchema
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+          format: int64
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+      responses:
+        "200":
+          description: Actualizado
+
+  /admin/forms/{id}/close:
+    post:
+      security:
+        - Bearer: []
+      tags: [Admin - Formularios]
+      summary: Cerrar formulario manualmente
+      operationId: adminCloseForm
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Cerrado
+
+  /admin/fields/templates:
+    get:
+      security:
+        - Bearer: []
+      tags: [Admin - Campos]
+      summary: Plantillas de campos comunes
+      operationId: adminGetFieldTemplates
+      responses:
+        "200":
+          description: Plantillas
+
+  /admin/forms/{form_id}/sections:
+    get:
+      security:
+        - Bearer: []
+      tags: [Admin - Secciones]
+      summary: Listar secciones del formulario
+      operationId: adminGetFormSections
+      parameters:
+        - name: form_id
+          in: path
+          required: true
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Secciones
+
+  /admin/dashboard/stats:
+    get:
+      security:
+        - Bearer: []
+      tags: [Admin - Dashboard]
+      summary: Estadísticas generales
+      operationId: adminDashboardStats
+      responses:
+        "200":
+          description: Stats
+
+  /admin/dashboard/forms:
+    get:
+      security:
+        - Bearer: []
+      tags: [Admin - Dashboard]
+      summary: Estadísticas por formulario
+      operationId: adminDashboardForms
+      responses:
+        "200":
+          description: Lista de stats por form
+
+  /admin/dashboard/submissions:
+    get:
+      security:
+        - Bearer: []
+      tags: [Admin - Dashboard]
+      summary: Inscripciones recientes
+      operationId: adminDashboardSubmissions
+      responses:
+        "200":
+          description: Lista
+
+  /admin/dashboard/responses-timeline:
+    get:
+      security:
+        - Bearer: []
+      tags: [Admin - Dashboard]
+      summary: Línea de tiempo de respuestas
+      operationId: adminResponsesTimeline
+      responses:
+        "200":
+          description: Serie temporal
+
+  /admin/dashboard/top-active-forms:
+    get:
+      security:
+        - Bearer: []
+      tags: [Admin - Dashboard]
+      summary: Formularios más activos
+      operationId: adminTopActiveForms
+      responses:
+        "200":
+          description: Ranking
+
+  /admin/dashboard/geographic-distribution:
+    get:
+      security:
+        - Bearer: []
+      tags: [Admin - Dashboard]
+      summary: Distribución geográfica
+      operationId: adminGeographicDistribution
+      responses:
+        "200":
+          description: Por provincia
+
+  /admin/dashboard/user-metrics:
+    get:
+      security:
+        - Bearer: []
+      tags: [Admin - Dashboard]
+      summary: Métricas de usuarios
+      operationId: adminUserMetrics
+      responses:
+        "200":
+          description: Métricas
+
+  /admin/submissions:
+    get:
+      security:
+        - Bearer: []
+      tags: [Admin - Inscripciones]
+      summary: Listar inscripciones con filtros (query params)
+      operationId: adminGetSubmissions
+      responses:
+        "200":
+          description: Lista paginada
+
+  /admin/attendance/update:
+    post:
+      security:
+        - Bearer: []
+      tags: [Admin - Asistencia]
+      summary: Actualizar asistencia (editor/admin)
+      operationId: adminUpdateAttendance
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+      responses:
+        "200":
+          description: OK
+
+  /admin/export/submissions:
+    post:
+      security:
+        - Bearer: []
+      tags: [Admin - Exportación]
+      summary: Exportar inscripciones (Excel)
+      operationId: adminExportSubmissions
+      produces:
+        - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+      responses:
+        "200":
+          description: Archivo o JSON
+
+  /admin/customization/forms/{id}:
+    get:
+      security:
+        - Bearer: []
+      tags: [Admin - Personalización]
+      summary: Obtener personalización
+      operationId: adminGetCustomization
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Personalización
+    post:
+      security:
+        - Bearer: []
+      tags: [Admin - Personalización]
+      summary: Crear o actualizar personalización
+      operationId: adminPostCustomization
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+          format: int64
+        - name: body
+          in: body
+          schema:
+            type: object
+      responses:
+        "200":
+          description: OK
+    put:
+      security:
+        - Bearer: []
+      tags: [Admin - Personalización]
+      summary: Crear o actualizar personalización (PUT)
+      operationId: adminPutCustomization
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+          format: int64
+        - name: body
+          in: body
+          schema:
+            type: object
+      responses:
+        "200":
+          description: OK
+
+  /admin/forms/{id}/image:
+    post:
+      security:
+        - Bearer: []
+      tags: [Admin - Imágenes]
+      summary: Subir imagen del formulario (multipart)
+      operationId: adminUploadFormImage
+      consumes:
+        - multipart/form-data
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+          format: int64
+        - name: image
+          in: formData
+          type: file
+      responses:
+        "200":
+          description: URL de la imagen
+    delete:
+      security:
+        - Bearer: []
+      tags: [Admin - Imágenes]
+      summary: Eliminar imagen del formulario
+      operationId: adminDeleteFormImage
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Eliminada
+
+  /admin/email/bulk:
+    post:
+      security:
+        - Bearer: []
+      tags: [Admin - Correos]
+      summary: Envío masivo de correos (solo admin)
+      operationId: adminBulkEmail
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+      responses:
+        "200":
+          description: Procesado
